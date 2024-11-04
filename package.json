@@ -9,9 +9,12 @@
   },
   "dependencies": {
     "ant-design-vue": "^3.2.0",
+    "axios": "^1.7.7",
     "core-js": "^3.8.3",
+    "cors": "^2.8.5",
     "vue": "^3.2.13",
-    "vue-baidu-map-3x": "^1.0.39"
+    "vue-baidu-map-3x": "^1.0.39",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -41,5 +44,6 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "proxy": "http://192.168.1.47:8080"
 }
