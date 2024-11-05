@@ -6,11 +6,11 @@ const routes = [
     name: 'login',
     component: () => import('@/components/LoginVue.vue')
   },
-//   {
-//     path: '/map',
-//     name: 'Map',
-//     component: () => import('@/views/Map.vue')
-//   }
+  {
+    path: '/HomeMap/:id',
+    name: 'HomeMap',
+    component: () => import('@/components/HomeMap.vue'),
+  }
 ]
 
 const router = createRouter({

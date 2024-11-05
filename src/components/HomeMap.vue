@@ -1,12 +1,20 @@
 <template>
   <a-layout style="min-height: calc(100vh - 64px)">
     <a-layout-header class="header">
-      <div class="logo" />
       <a-menu v-model:selectedKeys="selectedKeys1" theme="dark" mode="horizontal" :style="{ lineHeight: '64px' }">
-        <a-menu-item key="1">nav 1</a-menu-item>
+        <a-menu-item key="0" disabled>
+          <div class="logo">
+            <img src="../assets/logo.png" width="32" height="32" style="vertical-align: middle;margin-right: 8px;">
+            <span>
+              智能旅游攻略路线规划系统
+            </span>
+          </div>
+        </a-menu-item>
+        <a-menu-item key="1" @click="toPage">首页</a-menu-item>
         <a-menu-item key="2">nav 2</a-menu-item>
         <a-menu-item key="3">nav 3</a-menu-item>
       </a-menu>
+      <!-- <div style="float: right; padding: 0 24px;text-align: center;font-size: large;">{{ user.username }}</div> -->
     </a-layout-header>
     <a-layout-content style="padding: 0 50px;">
       <a-breadcrumb style="margin: 16px 0">
@@ -14,17 +22,20 @@
         <a-breadcrumb-item>List</a-breadcrumb-item>
         <a-breadcrumb-item>App</a-breadcrumb-item>
         <a-breadcrumb-item></a-breadcrumb-item>
-        <a-breadcrumb-item>{{ user.username }}</a-breadcrumb-item>
-        <a-breadcrumb-item>{{ user.password }}</a-breadcrumb-item>
       </a-breadcrumb>
       <a-layout style="padding: 24px 0; background: #fff">
         <a-layout-sider width="200" style="background: #fff">
           <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline" style="height: 100%">
-            <a-sub-menu key="sub1">
+            <!-- <div class = "avatar"> -->
+            <img :src="user.avatarUrl" id="avatar" alt="用户头像">
+            <div style="display: flex;justify-content: center;padding:30px 30px;font-size: 30px;">{{ user.username }}
+            </div>
+            <!-- </div>      -->
+            <a-sub-menu key="sub2">
               <template #title>
                 <span>
                   <user-outlined />
-                  subnav 1
+                  用户中心
                 </span>
               </template>
               <a-menu-item key="1">option1</a-menu-item>
@@ -32,11 +43,11 @@
               <a-menu-item key="3">option3</a-menu-item>
               <a-menu-item key="4">option4</a-menu-item>
             </a-sub-menu>
-            <a-sub-menu key="sub2">
+            <a-sub-menu key="sub3">
               <template #title>
                 <span>
                   <laptop-outlined />
-                  subnav 2
+                  开始出行
                 </span>
               </template>
               <a-menu-item key="5">option5</a-menu-item>
@@ -44,11 +55,11 @@
               <a-menu-item key="7">option7</a-menu-item>
               <a-menu-item key="8">option8</a-menu-item>
             </a-sub-menu>
-            <a-sub-menu key="sub3">
+            <a-sub-menu key="sub4">
               <template #title>
                 <span>
                   <notification-outlined />
-                  subnav 3
+                  本站数据
                 </span>
               </template>
               <a-menu-item key="9">option9</a-menu-item>
@@ -57,10 +68,13 @@
               <a-menu-item key="12">option12</a-menu-item>
             </a-sub-menu>
           </a-menu>
-         
+
         </a-layout-sider>
         <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', }">
-          <div id="allmap"></div>
+            <div v-if = "rou == null" id="allmap"/>
+          <div v-else :style="{ padding: '24px', background: '#fff' }">
+            <router-view />
+          </div>
         </a-layout-content>
       </a-layout>
     </a-layout-content>
@@ -81,8 +95,17 @@ export default defineComponent({
   },
   data() {
     return {
-      user: { username: '', password: '' }
+      rou:null,
+      user: {id:'',username: '', avatarUrl: '' }
     }
+  },
+  methods:{
+    toPage() {
+      this.rou = null
+      console.log(this.user);
+      
+      this.$router.push({path:`/HomeMap/${this.user.id}` });
+    },
   },
   setup() {
     onMounted(() => {
@@ -125,18 +148,22 @@ export default defineComponent({
 
     };
     return {
-      selectedKeys1: ref(['2']),
+      selectedKeys1: ref(['1']),
       selectedKeys2: ref(['1']),
-      openKeys: ref(['sub1']),
+      openKeys: ref(['sub2']),
     };
   },
   mounted() {
-    // 请求用户信息
-    api.get(`/findByIdRest/11`).then(res => {
+    const userId = this.$route.params.id
+    api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
+      console.log("this.user", this.user);
+
     }).catch(err => {
       console.log(err);
     });
+    // console.log("this.user",this.user);
+
   }
 });
 </script>
@@ -163,5 +190,30 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   margin: auto;
+}
+
+#avatar {
+  width: 100px;
+  /* 头像宽度 */
+  height: 100px;
+  /* 头像高度 */
+  border-radius: 50%;
+  /* 圆形头像 */
+  overflow: hidden;
+  /* 隐藏溢出部分 */
+  position: relative;
+  /* 相对定位 */
+  margin: auto;
+  /* 水平居中 */
+  display: flex;
+  /* 使用flex布局 */
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  object-fit: cover;
+  /* 裁剪图片以填充容器 */
+  border-radius: 50%;
+  /* 圆形图片 */
 }
 </style>

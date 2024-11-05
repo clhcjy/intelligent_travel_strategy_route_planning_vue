@@ -27,6 +27,24 @@
         <a-tab-pane key="2" tab="注册" forceRender>
           <!-- 注册表单 -->
           <a-form @submit="onRegisterSubmit">
+            <!-- 头像 -->
+            <a-form-item>
+              <div style="text-align: center;">
+                <a-upload name="file" class="avatar-uploader" :show-upload-list="false" :before-upload="beforeUpload"
+                  :action="uploadUrl" :headers="headers" @change="handleUploadChange">
+                  <div v-if="imageUrl" class="avatar">
+                    <img :src="imageUrl" alt="头像">
+                  </div>
+                  <div v-else>
+                    <a-icon :type="loading ? 'loading' : 'plus'" />
+                    <div class="ant-upload-text">
+                      <a>上传头像</a>
+                    </div>
+                  </div>
+                </a-upload>
+              </div>
+            </a-form-item>
+
             <a-form-item>
               <a-input placeholder="用户名" v-model:value="registerForm.username">
                 <template #prefix>
@@ -34,6 +52,7 @@
                 </template>
               </a-input>
             </a-form-item>
+
             <a-form-item>
               <a-input placeholder="密码" type="password" v-model:value="registerForm.password">
                 <template #prefix>
@@ -41,6 +60,15 @@
                 </template>
               </a-input>
             </a-form-item>
+
+            <a-form-item>
+              <a-input placeholder="确认密码" type="password" v-model:value="registerForm.confirmPassword">
+                <template #prefix>
+                  <a-icon type="lock" />
+                </template>
+              </a-input>
+            </a-form-item>
+
             <a-form-item>
               <a-button type="primary" html-type="submit">注册</a-button>
             </a-form-item>
@@ -65,6 +93,10 @@ export default {
   },
   data() {
     return {
+      headers: {
+        Authorization: 'Bearer your-token-here', // 如果需要的话
+      },
+      uploadUrl: 'http://192.168.1.47:8080/upload/User',
       loginForm: {
         username: '',
         password: '',
@@ -72,7 +104,11 @@ export default {
       registerForm: {
         username: '',
         password: '',
+        confirmPassword: '',
+        avatarUrl: ''
       },
+      loading: false,
+      imageUrl: '',
     };
   },
   methods: {
@@ -80,29 +116,73 @@ export default {
       e.preventDefault();
       console.log('Login:', this.loginForm);
       // 处理登录逻辑
-      api.post("/login", { username: this.loginForm.username, password: this.loginForm.password }).then(() => {
-        setTimeout(() => {
-          message.success("登录成功", { duration: 5000 });
-        }, 1000); // 延迟1秒显示成功消息
+      api.post("/login", { username: this.loginForm.username, password: this.loginForm.password }).then(res => {
+        if (res.data === '') {
+          message.error("登录失败：用户名或者密码错误")
+        }
+        else{message.success("登录成功");
+        console.log(res.data.id);
+        
+        this.$router.push({path:`/HomeMap/${res.data.id}` });}
       }).catch(err => {
-        setTimeout(() => {
-          message.error("登录失败：", err, { duration: 5000 })
-        }, 1000); // 延迟1秒显示成功消息
+        message.error("登录失败：", err)
       })
     },
     onRegisterSubmit(e) {
       e.preventDefault();
-      console.log('Register:', this.registerForm);
+      // 表单验证逻辑
+      if (this.registerForm.username === '') {
+        alert('请输入用户名');
+        return;
+      }
+      if (this.registerForm.password === '') {
+        alert('请输入密码');
+        return;
+      }
+      if (this.registerForm.password !== this.registerForm.confirmPassword) {
+        alert('两次输入的密码不一致');
+        return;
+      }
+
+      // 提交表单数据
+      console.log('注册表单数据:', this.registerForm);
+
       // 处理注册逻辑
-      api.post("/register", { username: this.registerForm.username, password: this.registerForm.password }).then(() => {
-        setTimeout(() => {
-        message.success("注册成功",  { duration: 5000 })
-        }, 1000); // 延迟1秒显示成功消息
+      api.post("/register", { username: this.registerForm.username, password: this.registerForm.password, avatarUrl: this.registerForm.avatarUrl }).then(() => {
+        message.success("注册成功")
       }).catch(err => {
-        setTimeout(() => {
-        message.error("注册失败：", err, { duration: 5000 })
-        }, 1000); // 延迟1秒显示成功消息
+        message.error("注册失败：", err)
       })
+    },
+    // 上传头像
+    beforeUpload(file) {
+      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      if (!isJpgOrPng) {
+        this.$message.error('只能上传 JPG 或 PNG 格式的图片!');
+      }
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        this.$message.error('图片大小不能超过 2MB!');
+      }
+      return isJpgOrPng && isLt2M;
+    },
+    handleUploadChange(info) {
+      const { status, response } = info.file;
+      console.log("response", response);
+
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        console.log("response", response);
+        const i = response.split('+')
+        this.registerForm.avatarUrl = i[1]
+        this.imageUrl = i[1]
+        this.$message.success(`${info.file.name} 文件上传成功.`);
+      } else if (status === 'error') {
+        this.$message.error(`${info.file.name} 文件上传失败.`);
+      }
+
     },
   },
 };
@@ -120,6 +200,12 @@ export default {
   background-position: center;
 }
 
+.avatar-uploader {
+  width: 128px;
+  height: 128px;
+  border-radius: 50% !important;
+}
+
 .login-register-card {
   width: 400px;
   padding: 20px;
@@ -127,5 +213,61 @@ export default {
   /* 半透明背景 */
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 移除头像上传框的背景 */
+.ant-upload-select-picture-card {
+  background-color: transparent !important;
+  /* 去除背景颜色 */
+  border: none !important;
+  /* 去除边框 */
+  border-radius: 50% !important;
+  /* 去除圆角 */
+}
+
+/* 移除图标和文字的背景 */
+.ant-upload-select-picture-card i,
+.ant-upload-text {
+  /* color: rgba(255, 255, 255, 0.8) !important; 根据需要调整颜色 */
+  background-color: transparent !important;
+  /*去除背景颜色*/
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+  border-radius: 50% !important;
+}
+
+.avatar {
+  width: 100px;
+  /* 头像宽度 */
+  height: 100px;
+  /* 头像高度 */
+  border-radius: 50%;
+  /* 圆形头像 */
+  overflow: hidden;
+  /* 隐藏溢出部分 */
+  position: relative;
+  /* 相对定位 */
+  margin: auto;
+  /* 水平居中 */
+  display: flex;
+  /* 使用flex布局 */
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+}
+
+.avatar img {
+  width: 100%;
+  /* 图片宽度填满容器 */
+  height: 100%;
+  /* 图片高度填满容器 */
+  object-fit: cover;
+  /* 裁剪图片以填充容器 */
+  border-radius: 50%;
+  /* 圆形图片 */
 }
 </style>
