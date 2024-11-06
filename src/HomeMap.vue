@@ -4,7 +4,7 @@
       <a-menu v-model:selectedKeys="selectedKeys1" theme="dark" mode="horizontal" :style="{ lineHeight: '64px' }">
         <a-menu-item key="0" disabled>
           <div class="logo">
-            <img src="../assets/logo.png" width="32" height="32" style="vertical-align: middle;margin-right: 8px;">
+            <img src="./assets/logo.png" width="32" height="32" style="vertical-align: middle;margin-right: 8px;">
             <span>
               智能旅游攻略路线规划系统
             </span>
@@ -50,10 +50,10 @@
                   开始出行
                 </span>
               </template>
-              <a-menu-item key="5">option5</a-menu-item>
-              <a-menu-item key="6">option6</a-menu-item>
-              <a-menu-item key="7">option7</a-menu-item>
-              <a-menu-item key="8">option8</a-menu-item>
+              <a-menu-item key="5" @click="toMap">地图模式</a-menu-item>
+              <a-menu-item key="6">数据模式</a-menu-item>
+              <!-- <a-menu-item key="7">option7</a-menu-item> -->
+              <a-menu-item key="8">AI模式</a-menu-item>
             </a-sub-menu>
             <a-sub-menu key="sub4">
               <template #title>
@@ -105,6 +105,10 @@ export default defineComponent({
       console.log(this.user);
       
       this.$router.push({path:`/HomeMap/${this.user.id}` });
+    },
+    toMap(){
+      this.rou = 'Map'
+      this.$router.push({name:`StrategyMap` });
     },
   },
   setup() {

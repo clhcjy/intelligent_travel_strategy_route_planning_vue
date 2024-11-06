@@ -194,7 +194,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: url('../assets/163720-1730623040d905.jpg');
+  background-image: url('./assets/163720-1730623040d905.jpg');
   /* 替换为你的背景图片 */
   background-size: cover;
   background-position: center;

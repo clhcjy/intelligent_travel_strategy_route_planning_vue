@@ -4,12 +4,17 @@ const routes = [
   {
     path: '/',
     name: 'login',
-    component: () => import('@/components/LoginVue.vue')
+    component: () => import('@/LoginVue.vue')
   },
   {
     path: '/HomeMap/:id',
     name: 'HomeMap',
-    component: () => import('@/components/HomeMap.vue'),
+    component: () => import('@/HomeMap.vue'),
+  },
+  {
+    path: '/StrategyMap',
+    name: 'StrategyMap',
+    component: () => import('@/components/StrategyMap.vue'),
   }
 ]
 
