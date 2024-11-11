@@ -120,10 +120,12 @@ export default {
         if (res.data === '') {
           message.error("登录失败：用户名或者密码错误")
         }
-        else{message.success("登录成功");
-        console.log(res.data.id);
-        
-        this.$router.push({path:`/HomeMap/${res.data.id}` });}
+        else {
+          message.success("登录成功");
+          console.log(res.data.id);
+          localStorage.setItem('userId', JSON.stringify(res.data.id)); // 保存变量到localStorage
+          this.$router.push({ path: `/HomeMap/${res.data.id}` });
+        }
       }).catch(err => {
         message.error("登录失败：", err)
       })

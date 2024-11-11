@@ -123,7 +123,7 @@ export default defineComponent({
         new Bmap.Point(114.0596, 22.5429),
         11
       ); // 初始化地图,设置中心点坐标和地图级别
-      map.setCurrentCity("深圳");
+      // map.setCurrentCity("深圳");
       map.enableScrollWheelZoom(true);
       map.setMapStyleV2({
         styleId: '858ac988b7e44629791444dd05828af4'
@@ -158,7 +158,7 @@ export default defineComponent({
     };
   },
   mounted() {
-    const userId = this.$route.params.id
+    const userId = localStorage.getItem('userId');
     api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
       console.log("this.user", this.user);

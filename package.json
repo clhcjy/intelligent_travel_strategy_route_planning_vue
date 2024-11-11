@@ -7,11 +7,12 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
-  "dependencies": {
+    "dependencies": {
     "ant-design-vue": "^3.2.0",
     "axios": "^1.7.7",
     "core-js": "^3.8.3",
     "cors": "^2.8.5",
+    "http-proxy-middleware": "^3.0.3",
     "vue": "^3.2.13",
     "vue-baidu-map-3x": "^1.0.39",
     "vue-router": "^4.4.5"
