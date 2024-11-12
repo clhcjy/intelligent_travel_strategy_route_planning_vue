@@ -1,121 +1,74 @@
 <template>
-    <div id="mapContainer" style="width: 100%; height: 100vh;" />
+    <div>
+        <baidu-map class="map" :center="{ lng:location.lng, lat:location.lat }" :zoom="19" map-type="BMAP_HYBRID_MAP" dragging="true" scroll-wheel-zoom="true" inertial-dragging="true" continuous-zoom="true">
+            <bm-overlay pane="labelPane" :class="{ sample: true, active }" @draw="draw" @mouseover="active = true"
+                @mouseleave="active = false">
+                <div @click="goHome()">回家</div>
+            </bm-overlay>
+        </baidu-map>
+    </div>
 </template>
 
-<script>
-import { loadBMapGL } from '../bmpgl';
-
-function loadScript(url) {
-    const script = document.createElement('script');
-    script.src = url;
-    document.head.appendChild(script);
-}
+<script setup>
+import { ref } from 'vue';
+import { useGeocoder } from 'vue-baidu-map-3x';
 
 
-export default {
-    name: 'MapComponent',
-    mounted() {
-        this.initMap();
-    },
-    data() {
-        return {
-            map: null
-        };
-    },
-    methods: {
-        async initMap() {
-            try {
-                const BMapGL = await loadBMapGL('CmqN6RHNG91vSKhL9APJQhhrSgTSghgl');
-                const map = new BMapGL.Map('mapContainer');
-                const point = new BMapGL.Point(114.0596, 22.5429);
-                map.centerAndZoom(point, 15);
-                // map.setCurrentCity("深圳");
-                map.setMapStyleV2({
-                    styleId: '858ac988b7e44629791444dd05828af4'
-                });
-                // 启用3D视图
-                map.enableScrollWheelZoom(true);
-
-                map.setHeading(64.5); // 设置地图旋转角度
-                map.setTilt(73);      // 设置地图的倾斜角度
-
-                // 创建自定义按钮覆盖物
-
-                // 首页按钮
-                const customButton = document.createElement('a');
-                customButton.href = '#';
-                customButton.textContent = '首页';
-                customButton.style.position = 'absolute';
-                customButton.style.top = '10px';
-                customButton.style.left = '15px';
-                customButton.style.zIndex = 1000;
-                // customButton.style.padding = '10px 20px';
-                // customButton.style.backgroundColor = '#0f1ff0';
-                customButton.style.color = '#0f1ff0';
-                customButton.style.border = 'none';
-                customButton.style.borderRadius = '5px';
-                customButton.style.cursor = 'pointer';
-                // 添加点击事件
-                customButton.onclick = this.handleButtonClick.bind(this);
-
-                // 回家按钮
-                const gohomeButton = document.createElement('a');
-                gohomeButton.href = '#';
-                gohomeButton.textContent = '回家';
-                gohomeButton.style.position = 'absolute';
-                gohomeButton.style.top = '10px';
-                gohomeButton.style.left = '60px';
-                gohomeButton.style.zIndex = 1000;
-                gohomeButton.style.color = '#0f1ff0';
-                gohomeButton.style.border = 'none';
-                gohomeButton.style.borderRadius = '5px';
-                gohomeButton.style.cursor = 'pointer';
-                gohomeButton.onclick = this.gohomeClick.bind(this);
-
-                // 添加按钮到地图容器
-                map.getContainer().appendChild(customButton);
-                map.getContainer().appendChild(gohomeButton);
-
-
-            } catch (error) {
-                console.error('百度地图GL JS API 加载失败:', error);
-            }
-        },
-        gohomeClick() {
-            let home = "深圳市宝安区福海街道重庆路11号新德公寓"
-            loadScript(`https://api.map.baidu.com/geocoder/v2/?address=${home}&output=json&ak=YOUR_API_KEY&callback=handleResponse`);
-
-        },
-        handleButtonClick() {
-            let userId = localStorage.getItem('userId')
-            this.$router.push({ path: `/HomeMap/${userId}` });
-        },
-
-
-    },
+const active = ref(false);
+const location = ref({
+    lng: 114.0596,
+    lat: 22.5429
+});
+const draw = ({ el, BMap, map }) => {
+    const pixel = map.pointToOverlayPixel(new BMap.Point(114.0596, 22.5429)) // 返回的坐标为覆盖物的左上角坐标。
+    el.style.left = pixel.x - 80 + 'px' // 最终坐标 = 覆盖物坐标 - 覆盖物宽度/2。 // 居中显示
+    el.style.top = pixel.y - 0 + 'px'
 };
+
+
+
+const goHome = () => {
+    // 通过地址获取坐标信息
+    useGeocoder().then((geocoder) => {
+        geocoder.getPoint('广东省深圳市宝安区福海街道重庆路11号新德公寓', (res) => {
+            console.log(res);
+            location.value.lng=res.lng
+            location.value.lat=res.lat  
+            console.log(location.value);
+            
+        });
+        // 通过坐标获取地址信息
+        // usePoint(116.404, 39.915).then(point => {
+        //     geocoder.getLocation(point, (result) => {
+        //         console.log(result);
+        //     });
+        // });
+    });
+}
 </script>
 
 <style>
-#mapContainer {
+.map {
     width: 100%;
     height: 100vh;
-    position: relative;
-    /* 确保按钮可以绝对定位 */
 }
 
-#customButton {
-    padding: 10px 20px;
-    /* 按钮内边距 */
-    background-color: #080808;
-    /* 按钮背景颜色 */
-    color: white;
-    /* 按钮文字颜色 */
-    border: none;
-    /* 无边框 */
-    border-radius: 5px;
-    /* 圆角边框 */
-    cursor: pointer;
-    /* 鼠标悬停时显示指针 */
+.sample {
+    position: absolute;
+    width: 80px;
+    height: 30px;
+    line-height: 40px;
+    background: rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    box-shadow: 0 0 5px #000;
+    color: #fff;
+    text-align: center;
+    /* text-justify: center; */
+    padding: 10px;
+}
+
+.sample.active {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
 }
 </style>
