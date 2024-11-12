@@ -38,10 +38,10 @@
                   用户中心
                 </span>
               </template>
-              <a-menu-item key="1">option1</a-menu-item>
-              <a-menu-item key="2">option2</a-menu-item>
-              <a-menu-item key="3">option3</a-menu-item>
-              <a-menu-item key="4">option4</a-menu-item>
+              <a-menu-item key="1">个人资料</a-menu-item>
+              <a-menu-item key="2">设置</a-menu-item>
+              <a-menu-item key="3">帮助中心</a-menu-item>
+              <a-menu-item key="4">世界你好</a-menu-item>
             </a-sub-menu>
             <a-sub-menu key="sub3">
               <template #title>
@@ -51,9 +51,9 @@
                 </span>
               </template>
               <a-menu-item key="5" @click="toMap">地图模式</a-menu-item>
-              <a-menu-item key="6">数据模式</a-menu-item>
+              <a-menu-item key="6" @click="toData">数据模式</a-menu-item>
               <!-- <a-menu-item key="7">option7</a-menu-item> -->
-              <a-menu-item key="8">AI模式</a-menu-item>
+              <a-menu-item key="8" @click="toAi">AI模式</a-menu-item>
             </a-sub-menu>
             <a-sub-menu key="sub4">
               <template #title>
@@ -62,16 +62,19 @@
                   本站数据
                 </span>
               </template>
-              <a-menu-item key="9">option9</a-menu-item>
-              <a-menu-item key="10">option10</a-menu-item>
-              <a-menu-item key="11">option11</a-menu-item>
-              <a-menu-item key="12">option12</a-menu-item>
+              <a-menu-item key="9">网站用户活跃度统计</a-menu-item>
+              <a-menu-item key="10">打赏支持</a-menu-item>
+              <a-menu-item key="11">留言板</a-menu-item>
+              <!-- <a-menu-item key="12">option12</a-menu-item> -->
             </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>
         <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', }">
-            <div v-if = "rou == null" id="allmap"/>
+          <div v-if="rou == null" id="allmap" />
+          <!-- <div v-else-if="rou == 'menu'">
+            <component :is="menu" />
+          </div> -->
           <div v-else :style="{ padding: '24px', background: '#fff' }">
             <router-view />
           </div>
@@ -79,7 +82,7 @@
       </a-layout>
     </a-layout-content>
     <a-layout-footer style="text-align: center">
-      Ant Design ©2018 Created by Ant UED
+      关于我@clhcjy email1754598483@qq.com
     </a-layout-footer>
   </a-layout>
 </template>
@@ -95,20 +98,29 @@ export default defineComponent({
   },
   data() {
     return {
-      rou:null,
-      user: {id:'',username: '', avatarUrl: '' }
+      rou: null,
+      user: { id: '', username: '', avatarUrl: '' },
+      menu: 'HomeMap', // 默认显示的组件
     }
   },
-  methods:{
+  methods: {
+    toData() {
+      this.rou = 'menu'
+      this.$router.push({ name: `StrategyData` });
+    },
+    toAi() {
+      this.rou = 'menu'
+      this.$router.push({ name: `StrategyAi` });
+    },
     toPage() {
       this.rou = null
       console.log(this.user);
-      
-      this.$router.push({path:`/HomeMap/${this.user.id}` });
+
+      this.$router.push({ path: `/HomeMap/${this.user.id}` });
     },
-    toMap(){
+    toMap() {
       this.rou = 'Map'
-      this.$router.push({name:`StrategyMap` });
+      this.$router.push({ name: `StrategyMap` });
     },
   },
   setup() {
