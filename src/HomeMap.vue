@@ -1,6 +1,6 @@
 <template>
   <a-layout style="min-height: calc(100vh - 64px)">
-    <a-layout-header class="header">
+    <a-layout-header class="header" :style="{ position: 'fixed', zIndex: 1, width: '100%' }">
       <a-menu v-model:selectedKeys="selectedKeys1" theme="dark" mode="horizontal" :style="{ lineHeight: '64px' }">
         <a-menu-item key="0" disabled>
           <div class="logo">
@@ -24,7 +24,7 @@
         <a-breadcrumb-item></a-breadcrumb-item>
       </a-breadcrumb>
       <a-layout style="padding: 24px 0; background: #fff">
-        <a-layout-sider width="200" style="background: #fff">
+        <a-layout-sider width="200" style="position: fixed; top: 64px; left: 0; background: #fff; height: calc(100vh - 64px);">
           <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline" style="height: 100%">
             <!-- <div class = "avatar"> -->
             <img :src="user.avatarUrl" id="avatar" alt="用户头像">
@@ -70,7 +70,7 @@
           </a-menu>
 
         </a-layout-sider>
-        <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', }">
+        <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', marginLeft: '152px',marginTop: '16px' }">
           <div v-if="rou == null" id="allmap" />
           <!-- <div v-else-if="rou == 'menu'">
             <component :is="menu" />
