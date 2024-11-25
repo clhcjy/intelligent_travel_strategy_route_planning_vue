@@ -3,11 +3,11 @@
   <a-tabs v-model:activeKey="activeKey" type="card">
     <a-tab-pane key="1" tab="我的攻略">
       <a-back-top />
-      <a-table :columns="columns" :data-source="data"
-        :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }" @change="changePage"
-        :pagination="pagination" :rowKey="record => record.id">
+      <a-table :columns="columns" :data-source="data">
+        <!-- :row-selection="{ selectedRowKeys: state.selectedRowKeys, onChange: onSelectChange }" @change="changePage"
+        :pagination="pagination" :rowKey="record => record.id"> -->
         <template #headerCell="{ column }">
-          <template v-if="column.key === 'StrategyRecord'">
+          <template v-if="column.key === 'projectName'">
             <span>
               <smile-outlined />
               {{ column.title }}
@@ -16,27 +16,19 @@
         </template>
 
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'StrategyRecord'">
+          <template v-if="column.key === 'projectName'">
             <a>
-              {{ record.title }}
+              {{ record.projectName }}
             </a>
           </template>
-          <template v-else-if="column.key === 'tags'">
+          <template v-if="column.key === 'action'">
             <span>
-              <a-tag v-for="tag in record.tags" :key="tag"
-                :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'">
-                {{ tag.toUpperCase() }}
-              </a-tag>
-            </span>
-          </template>
-          <template v-else-if="column.key === 'action'">
-            <span>
-              <a>Invite 一 {{ record.name }}</a>
+              <a>查看 一 {{ record.projectName }}</a>
               <a-divider type="vertical" />
-              <a>Delete</a>
+              <a>删除</a>
               <a-divider type="vertical" />
               <a class="ant-dropdown-link">
-                More actions
+                更多
                 <down-outlined />
               </a>
             </span>
@@ -116,16 +108,16 @@
 </template>
 <script setup>
 import { SmileOutlined, DownOutlined, InfoCircleOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons-vue';
-import { ref, reactive } from 'vue';
+import { ref, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { flattenedData } from '@/AreaDatas/flattenAddressData.js';
 import dayjs from 'dayjs';
 import api from '@/api/request.js';
-let pagination = {
-  total: null,
-  current: null,
-  pageSize: null,
-};
+// let pagination = {
+//   total: null,
+//   current: null,
+//   pageSize: null,
+// };
 let current = ref(1);
 let pageSize = ref(5);
 const activeKey = ref('1');
@@ -148,27 +140,16 @@ const columns = [
   },
   {
     title: '攻略记录',
-    dataIndex: 'StrategyRecord',
-    key: 'StrategyRecord',
+    dataIndex: 'projectName',
+    key: 'projectName',
+    width: 200,
+    align: 'center'
   },
   {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Tags',
-    key: 'tags',
-    dataIndex: 'tags',
-  },
-  {
-    title: 'Action',
+    title: '操作',
     key: 'action',
+    width: 150,
+    align: 'center'
   },
 ];
 
@@ -199,48 +180,23 @@ const TravingColumns = [
 
 let TravingData = [];
 
-const data = [
-  {
-    index: '1',
-    id: '1',
-    title: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer'],
-  },
-  {
-    index: '2',
-    id: '2',
-    title: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser'],
-  },
-  {
-    index: '3',
-    id: '3',
-    title: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher'],
-  },
-];
+const data = ref([]);
 let position = ref([]);
 const onSearch = (value) => {
   console.log('search:', value);
   console.log("已添加的地点：", position.value);
 };
 
-const state = reactive({
-  selectedRowKeys: [], // 选中行的 id 数组
-  stateloading: false,
-});
-const changePage = (page, pageSize) => {
-  console.log(page, pageSize)
-  // console.log(current,pageSize);
+// const state = reactive({
+//   selectedRowKeys: [], // 选中行的 id 数组
+//   stateloading: false,
+// });
+// const changePage = (page, pageSize) => {
+//   console.log(page, pageSize)
+//   // console.log(current,pageSize);
 
-  // if (searchOrAll == false) { searchAll(page.current, page.pageSize); } else { search(page.current, page.pageSize); }
-};
+//   // if (searchOrAll == false) { searchAll(page.current, page.pageSize); } else { search(page.current, page.pageSize); }
+// };
 const StartTheStrategy = () => {
   console.log(current, pageSize);
   isStart.value = true
@@ -271,10 +227,10 @@ const disabledDate = (current) => {
 };
 
 
-const onSelectChange = (selectedRowKeys) => {
-  console.log('表格选中: ', selectedRowKeys);
-  state.selectedRowKeys = selectedRowKeys;
-};
+// const onSelectChange = (selectedRowKeys) => {
+//   console.log('表格选中: ', selectedRowKeys);
+//   state.selectedRowKeys = selectedRowKeys;
+// };
 
 const enterName = (e) => {
   if (!e.target.value) {
@@ -325,8 +281,8 @@ const ConfirmTheTravel = () => {
   });
   for (let item in traving) {
     console.log(traving[item]);
-    api.post("/traving/insert", traving[item],{
-      header:{
+    api.post("/traving/insert", traving[item], {
+      header: {
         'Content-Type': 'application/json'
       }
     }).then(res => {
@@ -339,6 +295,23 @@ const ConfirmTheTravel = () => {
   }
 
 };
+
+const searchAll = () => {
+  api.get("/project/searchAll").then(res => {
+    console.log("res.data == ", res.data);
+    data.value = res.data.map((item, index) => {
+      item.index = index + 1;
+      return item;
+    });
+    console.log("data == ", data.value);
+  }).catch(err => {
+    console.log(err);
+  });
+};
+
+onMounted(() => {
+  searchAll();
+});
 
 </script>
 
