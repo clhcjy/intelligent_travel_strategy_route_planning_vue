@@ -114,7 +114,7 @@ img {
 }
 .card-wrapper{
     display: flex; /* 弹性盒子 */
-    flex-wrap: wrap; /* 弹性盒子换行 */
+    flex-wrap: wrap; /* 弹性盒子换行(不允许换行) */
     justify-content: space-around; /* 水平间距 */
     /* align-items: center;  */
 }
