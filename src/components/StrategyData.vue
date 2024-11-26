@@ -23,7 +23,7 @@
           </template>
           <template v-if="column.key === 'action'">
             <span>
-              <a>查看 一 {{ record.projectName }}</a>
+              <a @click="toDetail(record)">查看 一 {{ record.projectName }}</a>
               <a-divider type="vertical" />
               <a>删除</a>
               <a-divider type="vertical" />
@@ -113,6 +113,9 @@ import { message } from 'ant-design-vue';
 import { flattenedData } from '@/AreaDatas/flattenAddressData.js';
 import dayjs from 'dayjs';
 import api from '@/api/request.js';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 // let pagination = {
 //   total: null,
 //   current: null,
@@ -226,6 +229,9 @@ const disabledDate = (current) => {
 
 };
 
+const toDetail = (record) => {
+  router.push({ name: 'StrategyGuide', query: { uid: record.uid,pid: record.pid } });
+}
 
 // const onSelectChange = (selectedRowKeys) => {
 //   console.log('表格选中: ', selectedRowKeys);

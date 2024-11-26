@@ -19,6 +19,16 @@ const routes = [
         path: '/StrategyData',
         name: 'StrategyData',
         component: () => import('@/components/StrategyData.vue')
+      },
+      {
+        path: '/StrategyGuide',
+        name: 'StrategyGuide',
+        component: () => import('@/components/StrategyGuide.vue'),
+      },
+      {
+        path: '/classiFication',
+        name: 'classiFication',
+        component: () => import('@/components/classiFication.vue'),
       }
     ]
   },
@@ -26,7 +36,7 @@ const routes = [
     path: '/StrategyMap',
     name: 'StrategyMap',
     component: () => import('@/components/StrategyMap.vue'),
-  },
+  }
 ]
 
 const router = createRouter({

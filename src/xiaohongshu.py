@@ -58,7 +58,7 @@ time.sleep(1)  # 等待页面加载
 
 print("最终结果：", contents)
 
-name = ['标题', '内容', '图片链接']
+name = ['title', 'content', 'link']
 # 创建DataFrame对象并保存到Excel
 df = pd.DataFrame(data=contents, columns=name)
 df.to_excel('eat.xlsx', index=False)
