@@ -24,7 +24,8 @@
         <a-breadcrumb-item></a-breadcrumb-item>
       </a-breadcrumb>
       <a-layout style="padding: 24px 0; background: #fff">
-        <a-layout-sider width="200" style="position: fixed; top: 64px; left: 0; background: #fff; height: calc(100vh - 64px);">
+        <a-layout-sider width="200"
+          style="position: fixed; top: 64px; left: 0; background: #fff; height: calc(100vh - 64px);">
           <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline" style="height: 100%">
             <!-- <div class = "avatar"> -->
             <img :src="user.avatarUrl" id="avatar" alt="用户头像">
@@ -70,7 +71,7 @@
           </a-menu>
 
         </a-layout-sider>
-        <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', marginLeft: '152px',marginTop: '16px' }">
+        <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', marginLeft: '152px', marginTop: '16px' }">
           <div v-if="rou == null" id="allmap" />
           <!-- <div v-else-if="rou == 'menu'">
             <component :is="menu" />
@@ -88,7 +89,7 @@
 </template>
 <script>
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons-vue';
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref } from 'vue';
 import api from '@/api/request.js';
 export default defineComponent({
   components: {
@@ -116,42 +117,33 @@ export default defineComponent({
       this.rou = null
       console.log(this.user);
 
-      this.$router.push({ path: `/HomeMap/${this.user.id}` });
+      this.$router.push({ path: `/HomeMap` });
     },
     toMap() {
       this.rou = 'Map'
       this.$router.push({ name: `StrategyMap` });
     },
-  },
-  setup() {
-    onMounted(() => {
-      loadMapScript(); // 加载百度地图资源
-    });
-    // 初始化地图
-    const init = () => {
-      let Bmap = window.BMap; // 注意要带window，不然会报错（注意官方api,会有改动，之前是Bmap,后面3.0版本改为了BMap,最好查文档或者打印一下window）
-      var map = new Bmap.Map("allmap"); // allmap必须和dom上的id一直
+    initMap() {
+      let Bmap = window.BMap; // 注意要带window，不然会报错
+      var map = new Bmap.Map("allmap"); // allmap必须和dom上的id一致
       map.centerAndZoom(
         new Bmap.Point(114.0596, 22.5429),
         11
       ); // 初始化地图,设置中心点坐标和地图级别
-      // map.setCurrentCity("深圳");
       map.enableScrollWheelZoom(true);
       map.setMapStyleV2({
         styleId: '858ac988b7e44629791444dd05828af4'
       });
-    };
-    const loadMapScript = () => {
-      // 此处在所需页面引入资源就是，不用再public/index.html中引入
+    },
+    loadMapScript() {
       var script = document.createElement("script");
       script.type = "text/javascript";
-      script.className = "loadmap"; // 给script一个类名
+      script.className = "loadmap";
       script.src =
         "https://api.map.baidu.com/getscript?v=3.0&ak=CmqN6RHNG91vSKhL9APJQhhrSgTSghgl";
-      // 此处需要注意：申请ak时，一定要应用类别一定要选浏览器端，不能选服务端，不然地图会报ak无效
       script.onload = () => {
         // 使用script.onload，待资源加载完成，再初始化地图
-        init();
+        this.initMap();
       };
       let loadmap = document.getElementsByClassName("loadmap");
       if (loadmap) {
@@ -162,7 +154,9 @@ export default defineComponent({
       }
       document.body.appendChild(script);
 
-    };
+    },
+  },
+  setup() {
     return {
       selectedKeys1: ref(['1']),
       selectedKeys2: ref(['1']),
@@ -170,6 +164,8 @@ export default defineComponent({
     };
   },
   mounted() {
+    console.log("mounted");
+    
     const userId = localStorage.getItem('userId');
     api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
@@ -180,7 +176,16 @@ export default defineComponent({
     });
     // console.log("this.user",this.user);
 
-  }
+    this.loadMapScript(); // 加载百度地图资源
+  },
+  // watch: {
+  //   // 监听$route对象的变化
+  //   '$route': function () {
+  //     // 如果路由发生变化，重新加载地图
+  //     this.loadMapScript();
+  //   }
+  // }
+
 });
 </script>
 <style>

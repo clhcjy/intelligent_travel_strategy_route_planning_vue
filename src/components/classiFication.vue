@@ -23,8 +23,9 @@
 import { useRoute } from 'vue-router';
 import { ref, onMounted, h } from 'vue'
 import * as XLSX from 'xlsx';
+import { useRouter } from 'vue-router';
 
-// const py = require('node-pyrunner');
+const router = useRouter();
 
 const route = useRoute();
 
@@ -75,9 +76,9 @@ const items = [
         title: () => h('span', { style: 'font-size: 28px;padding:20px' }, '娱乐'),
     },
 ];
+const file = ref(""); // 获取文件
 let searchText = ref('');
 const readExcel = (href) => {
-    const file = ref(""); // 获取文件
     if(href == '#景点'){
         file.value = "./scenic.xlsx"; // 获取文件
     }else if(href == '#美食'){
@@ -115,11 +116,10 @@ const readExcel = (href) => {
 
 const cardPark = (item) => {
     console.log(item);
+    router.push({ name: 'DetailFication', query: { content: item.content, title: item.title, link: item.link } })
 }
 
 onMounted(() => {
-    // const uid = route.query.uid;
-    // const tid = route.query.tid;
     city.value = route.query.city;
     console.log("city == ", city);
 })

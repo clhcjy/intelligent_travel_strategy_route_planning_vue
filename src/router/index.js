@@ -6,7 +6,7 @@ const routes = [
     component: () => import('@/LoginVue.vue')
   },
   {
-    path: '/HomeMap/:id',
+    path: '/HomeMap',
     name: 'HomeMap',
     component: () => import('@/HomeMap.vue'),
     children:[
@@ -29,6 +29,11 @@ const routes = [
         path: '/classiFication',
         name: 'classiFication',
         component: () => import('@/components/classiFication.vue'),
+      },
+      {
+        path: '/DetailFication',
+        name: 'DetailFication',
+        component: () => import('@/components/DetailFication.vue'),
       }
     ]
   },
