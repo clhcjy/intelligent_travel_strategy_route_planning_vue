@@ -6,7 +6,7 @@ const routes = [
     component: () => import('@/LoginVue.vue')
   },
   {
-    path: '/HomeMap',
+    path: '/HomeMap/:id',
     name: 'HomeMap',
     component: () => import('@/HomeMap.vue'),
     children:[

@@ -1,15 +1,16 @@
 <template>
     <div></div>
-    <a-page-header style="border: 1px solid rgb(235, 237, 240)" :title="city + '计划'" @back="() => $router.push({path:'/HomeMap'})">
+    <a-page-header style="border: 1px solid rgb(235, 237, 240)" :title="city + '计划'"
+        @back="() => $router.push({ path: '/HomeMap' })">
         <template #extra>
             <a-input placeholder="搜索" v-model:value="searchText" @pressEnter="callPythonScript()" />
         </template>
     </a-page-header>
     <div style="padding: '20px';">
-        <a-anchor direction="horizontal" :items="items" @click="handleClick" />
+        <a-anchor :affix="false" direction="horizontal" :items="items" @click="handleClick" :get-current-anchor="getCurrentAnchor"/>
     </div>
-    <div v-if="href != ''" class="card-wrapper">
-        <a-card hoverable v-for="(item, index) in xlsxData" :key="index" style="width: 200px;margin: 20px;"
+    <div v-if="href.value != ''" class="card-wrapper">
+        <a-card :loading="loading" hoverable v-for="(item, index) in resources" :key="index" style="width: 200px;margin: 20px;"
             @click="cardPark(item)">
             <template #cover>
                 <img alt="example" :src="'/' + item.link" />
@@ -21,26 +22,25 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router';
-import { ref, onMounted, h } from 'vue'
-import * as XLSX from 'xlsx';
+import { ref, onMounted, h } from 'vue';
+// import * as XLSX from 'xlsx';
 import { useRouter } from 'vue-router';
+import api from '@/api/request';
 
 const router = useRouter();
 
 const route = useRoute();
 
-let xlsxData = ref(null);
+const loading = ref(true);
 
 let href = ref('');
 
 const handleClick = (e, link) => {
     href.value = link.href;
-    console.log(link);
     readExcel(link.href);
 };
 
 const callPythonScript = () => {
-    console.log(event.target.value);
 }
 
 const city = ref('');
@@ -76,52 +76,39 @@ const items = [
         title: () => h('span', { style: 'font-size: 28px;padding:20px' }, '娱乐'),
     },
 ];
-const file = ref(""); // 获取文件
+const resources = ref([]); // 获取文件
 let searchText = ref('');
 const readExcel = (href) => {
-    if(href == '#景点'){
-        file.value = "./scenic.xlsx"; // 获取文件
-    }else if(href == '#美食'){
-        file.value = "./eat.xlsx";
-    }else if(href == '#活动'){
-        file.value = "./activity.xlsx";
-    }else if(href == '#酒店'){
-        file.value = "./hotel.xlsx";
-    }else if(href == '#车票'){
-        file.value = "./ticket.xlsx";
-    }else if(href == '#娱乐'){
-        file.value = "./amusement.xlsx";
-    }
-    
-    fetch(file.value)
-        .then((response) => response.blob()) // 将文件转换为 Blob
-        .then((blob) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = e.target.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                xlsxData.value = jsonData; // 保存解析后的数据
-                console.log(xlsxData.value);
+    api.post('/resources/classification', { classification: href }, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }).then(res => {
+        resources.value = res.data.map((item, index) => {
+            item.index = index + 1;
+            return item;
+        })        
+        loading.value = false;
+    })
+};
 
-            };
-            reader.readAsBinaryString(blob); // 以二进制格式读取文件
-        })
-        .catch((error) => {
-            console.error('Error reading the XLSX file:', error);
-            alert('文件读取失败');
-        });
+const getCurrentAnchor = () => {
+    readExcel(href.value);
+    return href.value;
 };
 
 const cardPark = (item) => {
-    console.log(item);
-    router.push({ name: 'DetailFication', query: { content: item.content, title: item.title, link: item.link } })
+    
+    router.push({ name: 'DetailFication', query: {id:item.id, content: item.content, title: item.title, link: item.link } })
+    localStorage.setItem('classiFication', JSON.stringify({ uid: route.query.uid,tid: route.query.tid,city: route.query.city,href:href.value })); // 保存变量到localStorage
 }
 
 onMounted(() => {
     city.value = route.query.city;
-    console.log("city == ", city);
+    if(route.hash){
+        href.value = route.hash;
+    }
+    
 })
 </script>
 <style scoped>

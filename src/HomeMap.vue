@@ -73,9 +73,6 @@
         </a-layout-sider>
         <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', marginLeft: '152px', marginTop: '16px' }">
           <div v-if="rou == null" id="allmap" />
-          <!-- <div v-else-if="rou == 'menu'">
-            <component :is="menu" />
-          </div> -->
           <div v-else :style="{ padding: '24px', background: '#fff' }">
             <router-view />
           </div>
@@ -117,7 +114,7 @@ export default defineComponent({
       this.rou = null
       console.log(this.user);
 
-      this.$router.push({ path: `/HomeMap` });
+      this.$router.push({ path: `/HomeMap/${this.user.id}` });
     },
     toMap() {
       this.rou = 'Map'
@@ -135,7 +132,7 @@ export default defineComponent({
         styleId: '858ac988b7e44629791444dd05828af4'
       });
     },
-    loadMapScript() {
+    async loadMapScript() {
       var script = document.createElement("script");
       script.type = "text/javascript";
       script.className = "loadmap";
@@ -165,7 +162,7 @@ export default defineComponent({
   },
   mounted() {
     console.log("mounted");
-    
+
     const userId = localStorage.getItem('userId');
     api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
@@ -178,14 +175,24 @@ export default defineComponent({
 
     this.loadMapScript(); // 加载百度地图资源
   },
-  // watch: {
-  //   // 监听$route对象的变化
-  //   '$route': function () {
-  //     // 如果路由发生变化，重新加载地图
-  //     this.loadMapScript();
-  //   }
-  // }
-
+  created() {
+    this.loadMapScript();
+  },
+  watch: {
+  // 监听$route对象的变化
+  '$route': function (newRoute) {
+    // console.log('路由先前为：'+ oldRoute.fullPath);
+    // console.log('路由变化后为：'+ newRoute.fullPath);
+    
+    
+      // 如果路由发生变化，重新加载地图
+      if (newRoute.path === `/HomeMap/${localStorage.getItem('userId')}`) {
+        this.rou = null;
+        this.loadMapScript();
+      }
+    }
+  },
+  
 });
 </script>
 <style>

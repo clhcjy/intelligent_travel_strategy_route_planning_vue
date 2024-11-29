@@ -23,24 +23,24 @@
 
 
         <!-- 评论区 -->
-        <a-list class="comment-list" :header="`${data.length} replies`" item-layout="horizontal" :data-source="data">
+        <a-list class="comment-list" :header="`${data.length} 条评论`" item-layout="horizontal" :data-source="data">
             <template #renderItem="{ item }">
                 <a-list-item>
-                    <a-comment :author="item.author">
+                    <a-comment :author="item.username">
                         <template #avatar>
-                            <a-avatar :src="item.avatar" alt="Han Solo" @click="avatarClick(item.avatar)" />
+                            <a-avatar :src="item.avatar" :alt="item.username" @click="avatarClick(item.avatar)" />
                         </template>
-                        <template #actions>
+                        <!-- <template #actions>
                             <span v-for="(action, index) in item.actions" :key="index">{{ action }}</span>
-                        </template>
+                        </template> -->
                         <template #content>
                             <p>
                                 {{ item.content }}
                             </p>
                         </template>
                         <template #datetime>
-                            <a-tooltip :title="item.datetime.format('YYYY-MM-DD HH:mm:ss')">
-                                <span>{{ item.datetime.fromNow() }}</span>
+                            <a-tooltip :title="item.createTime.format('YYYY-MM-DD HH:mm:ss')">
+                                <span>{{ item.createTime.fromNow() }}</span>
                             </a-tooltip>
                         </template>
                     </a-comment>
@@ -64,26 +64,17 @@ const route = useRoute();
 dayjs.extend(relativeTime);
 
 const data = [
-    {
-        actions: ['Reply to'],
-        author: 'Han Solo',
-        avatar: 'https://q2.itc.cn/images01/20240523/baafa5e2f08c40b6a19d582f2d40de02.png',
-        content:
-            '不错不错',
-        datetime: dayjs().subtract(1, 'days'),
-    },
-    {
-        actions: ['Reply to'],
-        author: 'Han Solo',
-        avatar: 'https://img1.baidu.com/it/u=3775868057,326972211&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=716',
-        content:
-            '挺好挺好',
-        datetime: dayjs().subtract(2, 'days'),
-    },
+   
 ];
 
 const back = () => {
-    router.push({ path: `/HomeMap/${user.value.id}` });
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+        router.push({ name: 'classiFication', query: { uid: backTime.value.uid, tid: backTime.value.tid, city: backTime.value.city }, hash: backTime.value.href });
+
+    } else {
+        console.warn('userId is not defined in localStorage');
+    }
 };
 
 const avatarClick = (avatar) => {
@@ -91,9 +82,39 @@ const avatarClick = (avatar) => {
         // 使用window.open进行跳转
         window.open(avatar, '_blank');
     }
-}
+};
+
+const getData = (id) => {
+    api.post('/comment/findByDetailId', { DetailId: id }, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }).then(res => {
+        console.log("res == ", res.data);
+
+        for (let item in res.data) {
+            
+            api.get(`/findByIdRest/${res.data[item].uid}`).then(res => {
+                item.username = res.data.username;
+                item.avatarUrl = res.data.avatarUrl;
+            }).catch(err => {
+                console.log(err);
+            });
+
+            console.log("item",res.data[item]);
+        }
+        data.value = res.data.map((item, index) => {
+            item.index = index + 1;
+            return item;
+        })
+        console.log("data",data);
+        
+
+    })
+};
 
 const item = ref({
+    id: "",
     title: "",
     content: "",
     link: "",
@@ -104,12 +125,19 @@ const user = ref({
     avatarUrl: ''
 })
 
+const backTime = ref({});
+
 onMounted(() => {
+    item.value.id = route.query.id;
     item.value.title = route.query.title;
     item.value.content = route.query.content;
     item.value.link = route.query.link;
     console.log(item);
     const userId = localStorage.getItem('userId');
+    const k = localStorage.getItem('classiFication');
+    backTime.value = JSON.parse(k);
+    console.log("backTime == ", backTime.value);
+
     api.get(`/findByIdRest/${userId}`).then(res => {
         user.value = res.data;
         console.log("this.user", user.value);
@@ -118,8 +146,10 @@ onMounted(() => {
         console.log(err);
     });
 
+    getData(item.value.id);
 })
 </script>
+
 <style scoped>
 .detail-fication {
     width: 100%;
