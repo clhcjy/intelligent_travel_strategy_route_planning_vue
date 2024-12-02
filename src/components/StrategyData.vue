@@ -230,6 +230,7 @@ const disabledDate = (current) => {
 };
 
 const toDetail = (record) => {
+  localStorage.setItem('userProjectId', JSON.stringify(record.pid));
   router.push({ name: 'StrategyGuide', query: { uid: record.uid,pid: record.pid } });
 }
 

@@ -17,30 +17,28 @@
         <a-back-top />
     </div>
     <div>
-        <a-divider style="height: 5px" orientation="right" orientation-margin="50px">
-            <span style="opacity: 0.5;">留下你的评论</span>
+        <a-divider style="height: 5px" orientation="right" orientation-margin="0px">
+            <a-input v-model:value="comment" :bordered="false" placeholder="点击我，留下评论" @pressEnter="commentSubmit()" />
         </a-divider>
 
 
         <!-- 评论区 -->
-        <a-list class="comment-list" :header="`${data.length} 条评论`" item-layout="horizontal" :data-source="data">
+        <a-list  class="demo-loadmore-list" :loading="initLoading" :header="`${data.length} 条评论`" item-layout="horizontal" :data-source="data">
             <template #renderItem="{ item }">
                 <a-list-item>
                     <a-comment :author="item.username">
                         <template #avatar>
                             <a-avatar :src="item.avatar" :alt="item.username" @click="avatarClick(item.avatar)" />
                         </template>
-                        <!-- <template #actions>
-                            <span v-for="(action, index) in item.actions" :key="index">{{ action }}</span>
-                        </template> -->
+
                         <template #content>
                             <p>
                                 {{ item.content }}
                             </p>
                         </template>
                         <template #datetime>
-                            <a-tooltip :title="item.createTime.format('YYYY-MM-DD HH:mm:ss')">
-                                <span>{{ item.createTime.fromNow() }}</span>
+                            <a-tooltip :title="item.createTime">
+                                <span> {{ item.createTime.fromNow() }} </span>
                             </a-tooltip>
                         </template>
                     </a-comment>
@@ -57,15 +55,16 @@ import { useRouter } from "vue-router";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import api from '@/api/request.js';
+import moment from "moment";
 
 const router = useRouter();
 const route = useRoute();
 
 dayjs.extend(relativeTime);
 
-const data = [
-   
-];
+const data = ref([]);
+
+const comment = ref("");
 
 const back = () => {
     const userId = localStorage.getItem('userId');
@@ -75,6 +74,27 @@ const back = () => {
     } else {
         console.warn('userId is not defined in localStorage');
     }
+};
+
+const commentSubmit = () => {
+    const userId = localStorage.getItem('userId');
+    api.post('/comment/insert', {
+        content: comment.value,
+        detailId: parseInt(item.value.id, 10),
+        uid: userId,
+        user_project_id: localStorage.getItem('userProjectId'),
+        createTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => {
+        console.log("res == ", res);
+    })
+    setTimeout(() => {
+        data.value = [];
+        getData(item.value.id);
+    }, 1000);
 };
 
 const avatarClick = (avatar) => {
@@ -91,24 +111,29 @@ const getData = (id) => {
         }
     }).then(res => {
         console.log("res == ", res.data);
+        for (let item of res.data) {
 
-        for (let item in res.data) {
-            
-            api.get(`/findByIdRest/${res.data[item].uid}`).then(res => {
+            api.get(`/findByIdRest/${item.uid}`).then(res => {
                 item.username = res.data.username;
                 item.avatarUrl = res.data.avatarUrl;
+                data.value.push({
+                    index: item.id,
+                    content: item.content,
+                    createTime: moment(item.createTime),
+                    username: item.username,
+                    avatar: item.avatarUrl,
+                })
+
             }).catch(err => {
                 console.log(err);
             });
-
-            console.log("item",res.data[item]);
         }
-        data.value = res.data.map((item, index) => {
-            item.index = index + 1;
-            return item;
-        })
-        console.log("data",data);
-        
+        // 确保数据按时间排序
+        data.value.sort((a, b) => {
+            return moment(a.createTime).valueOf() - moment(b.createTime).valueOf();
+        });
+        console.log("data", data);
+
 
     })
 };
@@ -193,5 +218,9 @@ onMounted(() => {
     text-align: center;
     margin-left: 2%;
     font-size: large;
+}
+
+.demo-loadmore-list {
+  min-height: 350px;
 }
 </style>
