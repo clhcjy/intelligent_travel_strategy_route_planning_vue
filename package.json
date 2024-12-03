@@ -10,6 +10,7 @@
   "dependencies": {
     "ant-design-vue": "^4.2.6",
     "axios": "^1.7.7",
+    "baidu-map-gl": "^1.0.0",
     "core-js": "^3.8.3",
     "cors": "^2.8.5",
     "http-proxy-middleware": "^3.0.3",
