@@ -118,7 +118,7 @@ export default defineComponent({
     },
     toMap() {
       this.rou = 'Map'
-      this.$router.push({ name: `StrategyMap` });
+      this.$router.push({ name: `StrategyList` });
     },
     initMap() {
       let Bmap = window.BMap; // 注意要带window，不然会报错

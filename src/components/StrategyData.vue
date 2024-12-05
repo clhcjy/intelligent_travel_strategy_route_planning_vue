@@ -115,12 +115,10 @@ import dayjs from 'dayjs';
 import api from '@/api/request.js';
 import { useRouter } from 'vue-router';
 
+const strategyName = ref('');
+
 const router = useRouter();
-// let pagination = {
-//   total: null,
-//   current: null,
-//   pageSize: null,
-// };
+
 let current = ref(1);
 let pageSize = ref(5);
 const activeKey = ref('1');
@@ -131,7 +129,6 @@ const type = ref({
 
 });
 const isStart = ref(false);
-// console.log("AddressData == ",flattenedData);
 
 const columns = [
   {
@@ -190,16 +187,6 @@ const onSearch = (value) => {
   console.log("已添加的地点：", position.value);
 };
 
-// const state = reactive({
-//   selectedRowKeys: [], // 选中行的 id 数组
-//   stateloading: false,
-// });
-// const changePage = (page, pageSize) => {
-//   console.log(page, pageSize)
-//   // console.log(current,pageSize);
-
-//   // if (searchOrAll == false) { searchAll(page.current, page.pageSize); } else { search(page.current, page.pageSize); }
-// };
 const StartTheStrategy = () => {
   console.log(current, pageSize);
   isStart.value = true
@@ -231,7 +218,7 @@ const disabledDate = (current) => {
 
 const toDetail = (record) => {
   localStorage.setItem('userProjectId', JSON.stringify(record.pid));
-  router.push({ name: 'StrategyGuide', query: { uid: record.uid,pid: record.pid } });
+  router.push({ name: 'StrategyGuide', query: { uid: record.uid, pid: record.pid } });
 }
 
 // const onSelectChange = (selectedRowKeys) => {
@@ -243,8 +230,14 @@ const enterName = (e) => {
   if (!e.target.value) {
     message.info("名称不能为空哦！")
   } else {
-    console.log("value == ", e.target.value);
     type.value.city = "1"
+    api.post("/project/insert", { uid: localStorage.getItem('userId'), projectName: e.target.value }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(res => {
+      localStorage.setItem('projectId', JSON.stringify(res.data.pid)); // 保存变量到localStorage
+    })
   }
 };
 
@@ -280,6 +273,7 @@ const ConfirmTheTravel = () => {
   let traving = [];
   TravingData.forEach(item => {
     traving.push({
+      pid: localStorage.getItem('projectId'),
       city: item.name,
       startTime: item.startTime,
       endTime: item.endTime,
@@ -304,7 +298,11 @@ const ConfirmTheTravel = () => {
 };
 
 const searchAll = () => {
-  api.get("/project/searchAll").then(res => {
+  api.post("/project/searchByUid",{uid:localStorage.getItem('userId')},{
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }).then(res => {
     console.log("res.data == ", res.data);
     data.value = res.data.map((item, index) => {
       item.index = index + 1;
