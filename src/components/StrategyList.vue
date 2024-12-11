@@ -45,7 +45,7 @@ const editValuePicture = ref(null);
 const projects = ref([]);
 const editValue = ref(null);
 const fileList = ref([]);
-const uploadUrl = 'http://192.168.1.47:8080/upload/User';
+const uploadUrl = 'http://192.168.1.47:8081/upload/User';
 const headers = {
     Authorization: 'Bearer your-token-here', // 如果需要的话
 };

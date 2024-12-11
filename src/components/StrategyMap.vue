@@ -29,7 +29,24 @@
     </div>
   </div>
   <div
-    style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
+    style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;">
+    <a-button type="link" style="width:30%;float: right;text-align: center;margin-bottom: 10px;" />
+    <a-divider style="height: 1px; background-color: #000000" />
+    <a-list item-layout="horizontal" :data-source="ALLpoints" style="border: #000000">
+      <template #renderItem="{ item }">
+        <a-list-item @click="positionCenter(item)">
+          <a-list-item-meta :description="item.lng + '——' + item.lat">
+            <template #title>
+              <span>{{ item.title }}</span>
+              <a-button type="link" style="float: right;" @click="deletePoint(item)">删除</a-button>
+            </template>
+          </a-list-item-meta>
+        </a-list-item>
+      </template>
+    </a-list>
+  </div>
+  <div
+    style="position: absolute; bottom: 10px; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
     v-if="points.length > 0 && isProject == true">
     <a-divider style="height: 1px; background-color: #000000" />
     <a-list item-layout="horizontal" :data-source="points" style="border: #000000">
@@ -65,6 +82,8 @@ const route = useRoute();
 const options = ref([]);
 
 const points = ref([]);
+
+const ALLpoints = ref([]);
 
 const picture = ref(null);
 
@@ -128,10 +147,32 @@ const onSearch = () => {
   local.search(event.target.value);
 };
 const onSelect = (value) => {
-  console.log(value);
-  let point = new BMapGL.Point(value.lng, value.lat);
-  console.log("point", point);
+  console.log("VALUE",value);
+  console.log("options == ",options);
+  
+  const point = new BMapGL.Point(value.lng, value.lat);
+  const valuePoint = {
+    title: options.value.find(item => item.value === value).label,
+    lng: value.lng,
+    lat: value.lat
+  };
   map.centerAndZoom(point, 19);
+  addPoint(valuePoint)
+  points.value.push({
+    id: id,
+    title: valuePoint.title,
+    lng: value.lng,
+    lat: value.lat
+  })
+};
+
+
+// 添加点标记方法
+const addPoint = (value) => {
+  console.log("value ===", value);
+
+  const point = new BMapGL.Point(value.lng, value.lat);
+  const title = value.title;
   // 创建自定义的覆盖物图标
   var myIcon = new BMapGL.Icon("http://192.168.1.47:8082/greenPoint.png", new BMapGL.Size(23, 25), {
     imageSize: new BMapGL.Size(23, 25),
@@ -143,12 +184,11 @@ const onSelect = (value) => {
   // 添加覆盖物到地图
   map.addOverlay(marker);
   markers.push(marker); // 将标记添加到数组中
-  const title = options.value.find(item => item.value.lng === point.lng).label;
   // 创建信息窗口
   var opts = {
     width: 200,
     height: 70,
-    title: options.value.find(item => item.value.lng === point.lng).label,
+    title: title
   };
   var infoWindow = new BMapGL.InfoWindow(`地址：${title}`, opts);
   // 点标记添加点击事件
@@ -157,15 +197,11 @@ const onSelect = (value) => {
   });
 
   map.openInfoWindow(infoWindow, point); // 开启信息窗口
-  points.value.push({
-    id: marker.id,
-    title: options.value.find(item => item.value.lng === point.lng).label,
-    lng: value.lng,
-    lat: value.lat
-  })
-  console.log(points.value);
+  console.log("ALLpoints", ALLpoints.value);
+  console.log("points", points.value);
 
 };
+
 
 const deletePoint = (item) => {
   console.log("item", item);
@@ -192,16 +228,8 @@ const addAllPoints = () => {
   points.value = [];
   console.log("pointList", pointList);
   points.value = pointList.value;
-  // for(let item of pointList.value){
-  //   points.value.push({
-  //     id:item.position_id,
-  //     title:item.title,
-  //     lng:item.lng,
-  //     lat:item.lat
-  //   })
-  // }
-  console.log("points",points);
-  
+  console.log("points", points);
+
 };
 
 onMounted(() => {
@@ -213,6 +241,32 @@ onMounted(() => {
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     map.setMapStyleV2({
       styleId: '858ac988b7e44629791444dd05828af4'
+    });
+    map.addEventListener('tilesloaded', function () {
+      // alert('地图加载完成！');
+      if (ALLpoints.value.length === 0) {
+        api.post('/points/findByPid', { pid: pid.value }, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }).then(res => {
+          for (let i of res.data) {
+            const value = {
+              lng: i.lng,
+              lat: i.lat,
+              title: i.title
+            }
+            addPoint(value);
+            ALLpoints.value.push({
+              id: id,
+              title: value.title,
+              lng: value.lng,
+              lat: value.lat
+            })
+          }
+        })
+      }
+
     });
   }
   isProject.value = true;
