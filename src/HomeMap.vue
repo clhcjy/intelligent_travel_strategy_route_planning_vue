@@ -118,8 +118,8 @@ export default defineComponent({
     },
     toMap() {
       this.rou = 'Map'
-      this.$router.push({ name: `StrategyList` });
-    },
+      this.$router.push({ path: `HomeMap/${this.user.id}/StrategyList` });
+},
     initMap() {
       let Bmap = window.BMap; // 注意要带window，不然会报错
       var map = new Bmap.Map("allmap"); // allmap必须和dom上的id一致
@@ -155,14 +155,18 @@ export default defineComponent({
   },
   setup() {
     return {
-      selectedKeys1: ref(['1']),
-      selectedKeys2: ref(['1']),
-      openKeys: ref(['sub2']),
+      selectedKeys1: ref([]),
+      selectedKeys2: ref([]),
+      openKeys: ref([]),
     };
   },
   mounted() {
     console.log("mounted");
-
+    // const rou = localStorage.getItem('rou');
+    // if (rou) {
+      this.rou = 'Map';
+      localStorage.removeItem('rou');
+    // }
     const userId = localStorage.getItem('userId');
     api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
@@ -171,28 +175,24 @@ export default defineComponent({
     }).catch(err => {
       console.log(err);
     });
-    // console.log("this.user",this.user);
 
-    this.loadMapScript(); // 加载百度地图资源
+    // this.loadMapScript(); // 加载百度地图资源
   },
   created() {
-    this.loadMapScript();
+    // this.loadMapScript();
   },
   watch: {
-  // 监听$route对象的变化
-  '$route': function (newRoute) {
-    // console.log('路由先前为：'+ oldRoute.fullPath);
-    // console.log('路由变化后为：'+ newRoute.fullPath);
-    
-    
+    // 监听$route对象的变化
+    '$route': function (newRoute) {
       // 如果路由发生变化，重新加载地图
       if (newRoute.path === `/HomeMap/${localStorage.getItem('userId')}`) {
         this.rou = null;
+        
         this.loadMapScript();
       }
     }
   },
-  
+
 });
 </script>
 <style>
