@@ -16,7 +16,7 @@ const routes = [
         component: () => import('@/components/StrategyAi.vue')
       },
       {
-        path: 'StrategyList',
+        path: '/StrategyList',
         name: 'StrategyList',
         component: () => import('@/components/StrategyList.vue')
       },

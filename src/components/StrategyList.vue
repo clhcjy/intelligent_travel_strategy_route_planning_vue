@@ -1,9 +1,9 @@
 <template>
-    <div v-if="projects.length > 0" class="card-wrapper">
+    <div v-if="projects.length > 0" class="card-wrapper" @click="handleClickOutside">
         <a-card :loading="loading" hoverable v-for="(item, index) in projects" :key="index"
-            style="width: 200px;margin: 20px;" @click="toMap(item)">
+            style="width: 200px;margin: 20px;height: 250px;">
             <template #cover>
-                <div style="width:200px;height: 134px;">
+                <div style="width:200px;height: 134px;" @click="toMap(item)">
                     <img v-if="item.picture == null"
                         src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />
                     <img v-else alt="example" :src="item.picture" />
@@ -52,7 +52,7 @@ const headers = {
 const imageUrl = ref(null);
 
 const toMap = (item) => {
-    router.push({ name: 'StrategyMap',query: { pid: item.pid,projectName:item.projectName,picture:item.picture }});
+    router.push({ name: 'StrategyMap', query: { pid: item.pid, projectName: item.projectName, picture: item.picture } });
 };
 
 const handleUploadChange = ({ file, fileList }) => {
@@ -88,13 +88,20 @@ const handleUploadChange = ({ file, fileList }) => {
 const EditPicture = (item) => {
     editValuePicture.value = item.pid;
     isEditPicture.value = true;
-    console.log(item);
 };
 
 const EditName = (item) => {
-    console.log(item);
     editValue.value = item.pid;
     isEditName.value = true;
+};
+
+const handleClickOutside = (event) => {
+    // 检查点击的是否是a-card或其子元素
+    if (!event.target.matches('.ant-card') && !event.target.closest('.ant-card') && !event.target.matches('span')) {
+        isEditPicture.value = false;
+        isEditName.value = false;
+        console.log("点击其他区域");
+    }
 };
 
 const ToEditName = (item) => {
@@ -141,7 +148,7 @@ onMounted(() => {
 <style scoped>
 .card-wrapper {
     width: 100%;
-    height: auto;
+    height: 100vh;
     display: flex;
     flex-wrap: wrap;
 }

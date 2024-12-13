@@ -13,6 +13,7 @@
         <a-menu-item key="1" @click="toPage">首页</a-menu-item>
         <a-menu-item key="2">nav 2</a-menu-item>
         <a-menu-item key="3">nav 3</a-menu-item>
+        <a-menu-item key="4">light</a-menu-item>
       </a-menu>
       <!-- <div style="float: right; padding: 0 24px;text-align: center;font-size: large;">{{ user.username }}</div> -->
     </a-layout-header>
@@ -118,7 +119,7 @@ export default defineComponent({
     },
     toMap() {
       this.rou = 'Map'
-      this.$router.push({ path: `HomeMap/${this.user.id}/StrategyList` });
+      this.$router.push({ name: `StrategyList` });
 },
     initMap() {
       let Bmap = window.BMap; // 注意要带window，不然会报错
@@ -243,5 +244,9 @@ export default defineComponent({
   /* 裁剪图片以填充容器 */
   border-radius: 50%;
   /* 圆形图片 */
+}
+.ant-menu{
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
 }
 </style>

@@ -225,8 +225,8 @@ const back = () => {
   localStorage.setItem('rou', "Map");
   localStorage.setItem("openKey","sub2");
   localStorage.setItem("selectedKeys","5");
-  const userId = localStorage.getItem('userId');
-  router.push({ path: `HomeMap/${userId}/StrategyList` });
+  // const userId = localStorage.getItem('userId');
+  router.push({ path: `/StrategyList` });
 }
 
 
