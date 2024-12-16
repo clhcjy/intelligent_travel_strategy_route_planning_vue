@@ -52,7 +52,8 @@ const headers = {
 const imageUrl = ref(null);
 
 const toMap = (item) => {
-    router.push({ name: 'StrategyMap', query: { pid: item.pid, projectName: item.projectName, picture: item.picture } });
+    console.log("item",item);
+    router.push({ name: 'StrategyMap', query: { pid: item.pid, projectName: item.projectName, picture: item.picture,category: item.category } });
 };
 
 const handleUploadChange = ({ file, fileList }) => {
@@ -64,9 +65,11 @@ const handleUploadChange = ({ file, fileList }) => {
     }
     if (status === 'done') {
         console.log("response", response);
-        const i = response.split('+')
+        const a = response.split(':');
+        const b = a[1]+":"+a[2]+":"+a[3];
+        const i = b;
         let item = projects.value.find(item => item.pid === editValuePicture.value)
-        item.picture = i[1];
+        item.picture = i;
         api.post("/project/update", item, {
             headers: {
                 'Content-Type': 'application/json'
@@ -77,7 +80,9 @@ const handleUploadChange = ({ file, fileList }) => {
         }).catch(error => {
             message.error("修改失败:", error);
         })
-        imageUrl.value = i[1]
+        imageUrl.value = file.name
+        console.log("imageUrl", imageUrl);
+        
         message.success(`${file.name} 文件上传成功.`);
     } else if (status === 'error') {
         message.error(`${file.name} 文件上传失败.`);

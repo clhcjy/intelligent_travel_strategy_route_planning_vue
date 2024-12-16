@@ -1,6 +1,6 @@
 <template>
     <div></div>
-    <a-page-header style="border: 1px solid rgb(235, 237, 240)" :title="city + '计划'"
+    <a-page-header style="border: 1px solid rgb(235, 237, 240)" :title="'资源'"
         @back="() => $router.push({ path: '/HomeMap' })">
         <template #extra>
             <a-input placeholder="搜索" v-model:value="searchText" @pressEnter="callPythonScript()" />

@@ -63,13 +63,13 @@ const TravingData = ref([]);
 const toDetail = (record) => {
     console.log(record);
     
-  router.push({ name: 'classiFication', query: { uid: record.uid,tid: record.tid,city: record.city } });
+  router.push({ name: 'classiFication' });
 }
 
 onMounted(() => {
-    const uid = route.query.uid;
+    // const uid = route.query.uid;
     const pid = route.query.pid;
-    api.post("/traving/selectUidPid", { uid: uid, pid: pid }, {
+    api.post("/points/findByPid", { pid: pid }, {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         }

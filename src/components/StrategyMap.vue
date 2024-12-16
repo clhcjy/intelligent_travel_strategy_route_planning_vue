@@ -16,7 +16,6 @@
       添加项目：<a-input v-model:value="projectName" @pressEnter="addProject" placeholder="请输入项目名" />
     </div>
   </div>
-
   <!-- 点列表 -->
   <div
     style="position: absolute; top: 10px; right: 10px;width:30%;height: 20vh; z-index: 9999;display: flex;background-color: rgba(255, 255, 255, 0.8);border: #000000;">
@@ -28,9 +27,15 @@
       {{ projectName }}
     </div>
   </div>
+
   <div
-    style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
-    v-if="points.length > 0 && isProject == true">
+    style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #fff;" v-if="points.length > 0 && isProject == true">
+    <a @click="toggleExpand" v-if="isExpand === true"><UpOutlined />收起</a>
+    <a @click="toggleExpand" v-else><DownOutlined />展开</a>
+    </div>
+  <div
+    style="position: absolute; top: 22vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
+    v-if="points.length > 0 && isProject == true && isExpand == true">
     <a-divider style="height: 1px; background-color: #000000" />
     <a-list item-layout="horizontal" :data-source="points" style="border: #000000">
       <template #renderItem="{ item }">
@@ -86,7 +91,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { HighlightTwoTone,RollbackOutlined } from '@ant-design/icons-vue';
+import { HighlightTwoTone,RollbackOutlined,UpOutlined,DownOutlined } from '@ant-design/icons-vue';
 import api from '@/api/request.js';
 import { message } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
@@ -108,6 +113,8 @@ const route = useRoute();
 const router = useRouter();
 
 const pointDetail = ref({});
+
+const isExpand = ref(true);
 
 const options = ref([]);
 
@@ -133,6 +140,10 @@ let value = ref('');
 let markers = []; // 用于存储所有标记的数组
 let map = null;
 let BMapGL = window.BMapGL;
+
+const toggleExpand = () => {
+  isExpand.value = !isExpand.value;
+};
 
 const addProject = () => {
   api.post("/project/insert", { uid: localStorage.getItem('userId'), projectName: projectName.value }, {
@@ -223,7 +234,7 @@ const onSelect = (value) => {
 const back = () => {
   console.log("111");
   localStorage.setItem('rou', "Map");
-  localStorage.setItem("openKey","sub2");
+  localStorage.setItem("openKey","sub3");
   localStorage.setItem("selectedKeys","5");
   // const userId = localStorage.getItem('userId');
   router.push({ path: `/StrategyList` });
@@ -329,8 +340,14 @@ onMounted(() => {
     { id: "cf220422142f07d460517b8335cd04c2", label: "出行" },
     { id: "1c6d6374945d0bce4a46caf62d778220", label: "绿野仙踪" },
   ]
+  const category = ref('');
+  if(route.query.category != null){
+    category.value = route.query.category;
+  }else{
+    category.value = "原版";
+  }
   const selectedStyleId = ref('');
-  selectedStyleId.value = style.value[0].id; // 默认选择第一个styleId
+  selectedStyleId.value = style.value[1].id; // 默认选择第一个styleId
   if (container.value) {
     map = new BMapGL.Map(container.value, { showControls: true });
     map.centerAndZoom('深圳市', 15);
@@ -338,7 +355,7 @@ onMounted(() => {
     map.setHeading(64.5);
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     map.setMapStyleV2({
-      styleId: style.value.find(item => item.label == "原版").id
+      styleId: style.value.find(item => item.label === category.value).id
     });
 
     map.addEventListener('tilesloaded', function () {

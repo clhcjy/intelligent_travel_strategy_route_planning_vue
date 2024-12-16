@@ -94,6 +94,7 @@ const commentSubmit = () => {
     setTimeout(() => {
         data.value = [];
         getData(item.value.id);
+        comment.value = '';
     }, 1000);
 };
 

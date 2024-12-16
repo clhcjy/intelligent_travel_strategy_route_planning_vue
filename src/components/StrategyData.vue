@@ -1,6 +1,6 @@
 <template>
 
-  <a-tabs v-model:activeKey="activeKey" type="card">
+  <a-tabs v-model:activeKey="activeKey" type="card" @change="tabClick">
     <a-tab-pane key="1" tab="我的攻略">
       <a-back-top />
       <a-table :columns="columns" :data-source="data">
@@ -89,17 +89,9 @@
 
 
     </a-tab-pane>
-    <a-tab-pane key="3" tab="资源查询">
+    <a-tab-pane key="3" tab="资源查询" @click="toClass">
       <a-back-top />
-      f Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab
-      Pane
-      3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content
-      of
-      Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane
-      3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content
-      of
-      Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane
-      3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3Content of Tab Pane 3
+      <router-view />
     </a-tab-pane>
   </a-tabs>
 
@@ -182,6 +174,17 @@ let TravingData = [];
 
 const data = ref([]);
 let position = ref([]);
+
+const tabClick = () => {
+  console.log("activeKey",activeKey);
+  if(activeKey.value == '3'){
+  router.push({name:"StrategyDataDetail"});
+}
+}
+const toClass = () => {
+  router.push({name:"StrategyDataDetail"});
+}
+
 const onSearch = (value) => {
   console.log('search:', value);
   console.log("已添加的地点：", position.value);
@@ -316,6 +319,8 @@ const searchAll = () => {
 
 onMounted(() => {
   searchAll();
+
+
 });
 
 </script>

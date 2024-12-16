@@ -120,7 +120,7 @@ export default defineComponent({
     toMap() {
       this.rou = 'Map'
       this.$router.push({ name: `StrategyList` });
-},
+    },
     initMap() {
       let Bmap = window.BMap; // 注意要带window，不然会报错
       var map = new Bmap.Map("allmap"); // allmap必须和dom上的id一致
@@ -130,7 +130,7 @@ export default defineComponent({
       ); // 初始化地图,设置中心点坐标和地图级别
       map.enableScrollWheelZoom(true);
       map.setMapStyleV2({
-        styleId: '858ac988b7e44629791444dd05828af4'
+        styleId: 'ca493665f0465225899b802fbf5f5f3e'
       });
     },
     async loadMapScript() {
@@ -163,11 +163,11 @@ export default defineComponent({
   },
   mounted() {
     console.log("mounted");
-    // const rou = localStorage.getItem('rou');
-    // if (rou) {
-      this.rou = 'Map';
-      localStorage.removeItem('rou');
-    // }
+    const rou = localStorage.getItem('rou');
+    this.rou = rou;
+    if (this.rou === null) {
+      this.loadMapScript();
+    }
     const userId = localStorage.getItem('userId');
     api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
@@ -185,11 +185,18 @@ export default defineComponent({
   watch: {
     // 监听$route对象的变化
     '$route': function (newRoute) {
+      console.log("新路由",newRoute);
+      
       // 如果路由发生变化，重新加载地图
       if (newRoute.path === `/HomeMap/${localStorage.getItem('userId')}`) {
         this.rou = null;
-        
+
         this.loadMapScript();
+      }
+      if (newRoute.path === `StrategyList`) {
+        this.toMap();
+        console.log(1111111111);
+        
       }
     }
   },
@@ -245,7 +252,8 @@ export default defineComponent({
   border-radius: 50%;
   /* 圆形图片 */
 }
-.ant-menu{
+
+.ant-menu {
   background-color: rgba(0, 0, 0, 0.7);
   color: #fff;
 }

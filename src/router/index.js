@@ -23,7 +23,14 @@ const routes = [
       {
         path: '/StrategyData',
         name: 'StrategyData',
-        component: () => import('@/components/StrategyData.vue')
+        component: () => import('@/components/StrategyData.vue'),
+        children:[
+          {
+            path: '/StrategyData/StrategyDataDetail',
+            name: 'StrategyDataDetail',
+            component: () => import('@/components/classiFication.vue')
+          }
+        ]
       },
       {
         path: '/StrategyGuide',
