@@ -38,9 +38,25 @@ const TravingColumns = [
         align: 'center',
     },
     {
-        title: '城市名',
-        dataIndex: 'city',
-        key: 'city',
+        title: '地址',
+        dataIndex: 'title',
+        key: 'title',
+        width: 200,
+        align: 'center',
+    },
+    {
+        title: '左坐标',
+        dataIndex: 'lng',
+        key: 'lng',
+        width: 200,
+        align: 'center',
+    },
+    {
+        title: '右坐标',
+        dataIndex: 'lat',
+        key: 'lat',
+        width: 200,
+        align: 'center',
     },
     {
         title: '开始时间',

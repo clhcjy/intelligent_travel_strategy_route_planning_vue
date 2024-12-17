@@ -21,6 +21,11 @@ const routes = [
         component: () => import('@/components/StrategyList.vue')
       },
       {
+        path: '/StrategyComment',
+        name: 'StrategyComment',
+        component: () => import('@/components/StrategyComment.vue')
+      },
+      {
         path: '/StrategyData',
         name: 'StrategyData',
         component: () => import('@/components/StrategyData.vue'),

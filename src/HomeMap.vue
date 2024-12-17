@@ -40,7 +40,7 @@
                   用户中心
                 </span>
               </template>
-              <a-menu-item key="1">个人资料</a-menu-item>
+              <a-menu-item key="1" @click="toComment">个人资料</a-menu-item>
               <a-menu-item key="2">设置</a-menu-item>
               <a-menu-item key="3">帮助中心</a-menu-item>
               <a-menu-item key="4">世界你好</a-menu-item>
@@ -117,6 +117,10 @@ export default defineComponent({
 
       this.$router.push({ path: `/HomeMap/${this.user.id}` });
     },
+    toComment(){
+      this.rou = "comment"
+      this.$router.push({ name: `StrategyComment` }); 
+    },
     toMap() {
       this.rou = 'Map'
       this.$router.push({ name: `StrategyList` });
@@ -165,9 +169,14 @@ export default defineComponent({
     console.log("mounted");
     const rou = localStorage.getItem('rou');
     this.rou = rou;
+    console.log("rou",rou);
+    
     if (this.rou === null) {
       this.loadMapScript();
     }
+
+    localStorage.removeItem("rou");
+    
     const userId = localStorage.getItem('userId');
     api.get(`/findByIdRest/${userId}`).then(res => {
       this.user = res.data;
@@ -180,13 +189,14 @@ export default defineComponent({
     // this.loadMapScript(); // 加载百度地图资源
   },
   created() {
+    this.rou = null;
     // this.loadMapScript();
   },
   watch: {
     // 监听$route对象的变化
     '$route': function (newRoute) {
-      console.log("新路由",newRoute);
-      
+      console.log("新路由", newRoute);
+
       // 如果路由发生变化，重新加载地图
       if (newRoute.path === `/HomeMap/${localStorage.getItem('userId')}`) {
         this.rou = null;
@@ -196,7 +206,7 @@ export default defineComponent({
       if (newRoute.path === `StrategyList`) {
         this.toMap();
         console.log(1111111111);
-        
+
       }
     }
   },

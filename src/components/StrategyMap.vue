@@ -294,6 +294,7 @@ const addPoint = (value) => {
   label.addEventListener('click', function () {
     // 可以在这里添加点击事件，比如打开一个弹窗
     map.centerAndZoom(point, 19);
+    map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     DetailPoint.value = true;
     pointDetail.value = value;
   });
