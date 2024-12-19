@@ -29,10 +29,15 @@
   </div>
 
   <div
-    style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #fff;" v-if="points.length > 0 && isProject == true">
-    <a @click="toggleExpand" v-if="isExpand === true"><UpOutlined />收起</a>
-    <a @click="toggleExpand" v-else><DownOutlined />展开</a>
-    </div>
+    style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #fff;"
+    v-if="points.length > 0 && isProject == true">
+    <a @click="toggleExpand" v-if="isExpand === true">
+      <UpOutlined />收起
+    </a>
+    <a @click="toggleExpand" v-else>
+      <DownOutlined />展开
+    </a>
+  </div>
   <div
     style="position: absolute; top: 22vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
     v-if="points.length > 0 && isProject == true && isExpand == true">
@@ -52,6 +57,8 @@
     <a-divider style="height: 1px; background-color: #000000" />
     <a-button type="link" style="width:30%;float: right;text-align: center;margin-bottom: 10px;"
       @click="addAllPoints">全部添加</a-button>
+      <a-button type="link" style="width:30%;float: right;text-align: center;margin-bottom: 10px;"
+      @click="deleteAllPoints">全部删除</a-button>
   </div>
 
   <div
@@ -81,21 +88,28 @@
     v-show="DetailPoint">
     <a-drawer v-model:open="DetailPoint" class="custom-class" root-class-name="root-class-name"
       :root-style="{ color: 'blue' }" style="color: red;" :title="pointDetail.title" :get-container="false"
-      :mask="false" placement="left" @after-open-change="afterOpenChange">
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
+      :mask="false" placement="left">
+      <div class="info-window">
+        <p class="address">地址：{{ pointDetail.address }}</p>
+        <p>省份：{{ pointDetail.province }}</p>
+        <p>城市：{{ pointDetail.city }}</p>
+        <p>标签：
+          <a-tag color="success" class="label" v-for="item in pointDetail.tags" :key="item">{{ item }}</a-tag>
+        </p>
+        <a-input v-model:value="searchText" placeholder="搜索附近"
+          @pressEnter="searchNearby(pointDetail.lng, pointDetail.lat)" />
+      </div>
     </a-drawer>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { HighlightTwoTone,RollbackOutlined,UpOutlined,DownOutlined } from '@ant-design/icons-vue';
+import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined } from '@ant-design/icons-vue';
 import api from '@/api/request.js';
 import { message } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
-import {useRouter} from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const container = ref(null);
 
@@ -112,11 +126,15 @@ const MapPicture = ref([
 const route = useRoute();
 const router = useRouter();
 
+const searchText = ref('');
+
 const pointDetail = ref({});
 
 const isExpand = ref(true);
 
 const options = ref([]);
+
+const other = ref([]);
 
 const points = ref([]);
 
@@ -168,12 +186,12 @@ const addProject = () => {
   isProject.value = true;
 }
 
-const afterOpenChange = () => {
-  console.log('open', event);
-};
+// const afterOpenChange = () => {
+//   DetailPoint.value = false;
+// };
 
 const ToSetMapType = (value) => {
-  console.log(value);
+
 
   map.setMapStyleV2({
     styleId: style.value.find(item => item.label == value.label).id
@@ -197,11 +215,14 @@ const onSearch = () => {
   options.value = [];
   var local = new BMapGL.LocalSearch(map, {
     onSearchComplete: function (results) {
-
       results._pois.forEach((item) => {
         options.value.push({
           value: item.point,
-          label: item.title
+          label: item.title,
+          address: item.address,
+          city: item.city,
+          province: item.province,
+          tags: item.tags,
         });
       });
 
@@ -213,13 +234,17 @@ const onSearch = () => {
   local.search(event.target.value);
 };
 const onSelect = (value) => {
-  console.log("options", options);
 
   const point = new BMapGL.Point(value.lng, value.lat);
   const valuePoint = {
     title: options.value.find(item => item.value.lng === value.lng).label,
     lng: value.lng,
-    lat: value.lat
+    lat: value.lat,
+    label: options.value.find(item => item.value.lng === value.lng).title,
+    address: options.value.find(item => item.value.lng === value.lng).address,
+    city: options.value.find(item => item.value.lng === value.lng).city,
+    province: options.value.find(item => item.value.lng === value.lng).province,
+    tags: options.value.find(item => item.value.lng === value.lng).tags,
   };
   map.centerAndZoom(point, 19);
   addPoint(valuePoint)
@@ -227,15 +252,20 @@ const onSelect = (value) => {
     id: id,
     title: valuePoint.title,
     lng: value.lng,
-    lat: value.lat
+    lat: value.lat,
+    label: valuePoint.title,
+    address: valuePoint.address,
+    city: valuePoint.city,
+    province: valuePoint.province,
+    tags: valuePoint.tags,
   })
 };
 
 const back = () => {
-  console.log("111");
+
   localStorage.setItem('rou', "Map");
-  localStorage.setItem("openKey","sub3");
-  localStorage.setItem("selectedKeys","5");
+  localStorage.setItem("openKey", "sub3");
+  localStorage.setItem("selectedKeys", "5");
   // const userId = localStorage.getItem('userId');
   router.push({ path: `/StrategyList` });
 }
@@ -254,7 +284,6 @@ const addPoint = (value) => {
   });
   var marker = new BMapGL.Marker(point, { icon: myIcon });
   marker.id = id + 1; // 为marker添加唯一标识
-  id++;
   // 添加覆盖物到地图
   map.addOverlay(marker);
   markers.push(marker); // 将标记添加到数组中
@@ -263,6 +292,7 @@ const addPoint = (value) => {
     position: point,
     offset: new BMapGL.Size(-title.length * 7, -35) // 偏移量设置为水平居中，-25是向下的偏移量
   });
+  label.lid = marker.id; // 自定义属性作为标识
   label.setStyle({
     color: "#000",
     border: "none",
@@ -275,6 +305,7 @@ const addPoint = (value) => {
     borderRadius: "5px",
     boxShadow: "2px 2px 5px #666",
   });
+  id++;
   // 根据缩放级别动态添加或移除标签
   const zoomEndHandler = () => {
     if (map.getZoom() < 14) { // 当缩放级别小于14时
@@ -295,8 +326,10 @@ const addPoint = (value) => {
     // 可以在这里添加点击事件，比如打开一个弹窗
     map.centerAndZoom(point, 19);
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
-    DetailPoint.value = true;
+    DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
+    console.log(pointDetail.value);
+
   });
 
 };
@@ -313,9 +346,12 @@ const deletePoint = (item) => {
 const addAllPoints = () => {
 
   const pointList = ref([]);
+
+
   for (let i of points.value) {
     delete (i.id);
     i.pid = pid.value;
+    i.tags = JSON.stringify(i.tags);
     api.post("/points/insert", i).then(res => {
       message.success("添加成功！", res)
       pointList.value.push(res.data);
@@ -331,6 +367,60 @@ const addAllPoints = () => {
 
 };
 
+const deleteAllPoints = () => {
+  points.value = [];
+};
+
+const searchNearby = (lng, lat) => {
+  var point = new BMapGL.Point(lng, lat);
+  console.log(point);
+
+  var local = new BMapGL.LocalSearch(map, {
+    onSearchComplete: function (results) {
+      results._pois.forEach((item) => {
+        other.value.push({
+          value: item.point,
+          label: item.title,
+          address: item.address,
+          city: item.city,
+          province: item.province,
+          tags: item.tags,
+        });
+      });
+      console.log("other == ", other);
+
+      for (let i of other.value) {
+        let value = {};
+        value = {
+          lng: i.value.lng,
+          lat: i.value.lat,
+          title: i.label,
+          address: i.address,
+          city: i.city,
+          province: i.province,
+          tags: i.tags
+        }
+
+        addPoint(value);
+        points.value.push({
+          id: id,
+          title: value.title,
+          lng: value.lng,
+          lat: value.lat,
+          address: value.address,
+          city: value.city,
+          province: value.province,
+          tags: value.tags
+        })
+      }
+
+    },
+    // 阻止百度地图自动渲染搜索结果
+    renderOptions: { map: null, autoViewport: false, panel: "r-result" }
+  });
+  local.searchNearby(searchText.value, point, 100);
+};
+
 onMounted(() => {
   style.value = [
     { id: "ad57d26a4c2ae1ad9886b19395ea2a76", label: "原版" },
@@ -342,9 +432,9 @@ onMounted(() => {
     { id: "1c6d6374945d0bce4a46caf62d778220", label: "绿野仙踪" },
   ]
   const category = ref('');
-  if(route.query.category != null){
+  if (route.query.category != null) {
     category.value = route.query.category;
-  }else{
+  } else {
     category.value = "原版";
   }
   const selectedStyleId = ref('');
@@ -358,7 +448,9 @@ onMounted(() => {
     map.setMapStyleV2({
       styleId: style.value.find(item => item.label === category.value).id
     });
-
+    // map.addEventListener('click', function () {
+    //   afterOpenChange();
+    // });
     map.addEventListener('tilesloaded', function () {
       // alert('地图加载完成！');
       if (ALLpoints.value.length === 0) {
@@ -371,14 +463,22 @@ onMounted(() => {
             const value = {
               lng: i.lng,
               lat: i.lat,
-              title: i.title
+              title: i.title,
+              address: i.address,
+              city: i.city,
+              province: i.province,
+              tags: JSON.parse(i.tags)
             }
             addPoint(value);
             ALLpoints.value.push({
               id: id,
               title: value.title,
               lng: value.lng,
-              lat: value.lat
+              lat: value.lat,
+              address: value.address,
+              city: value.city,
+              province: value.province,
+              tags: value.tags
             })
           }
         })
@@ -400,5 +500,40 @@ onMounted(() => {
   height: 25px;
   background-size: cover;
   cursor: pointer;
+}
+
+.info-window {
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  max-width: 300px;
+}
+
+.info-window h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.info-window p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.info-window .label {
+  display: inline-block;
+  background-color: #e0f7fa;
+  border-radius: 3px;
+  padding: 2px 5px;
+  margin-right: 5px;
+  font-size: 12px;
+  color: #00796b;
+}
+
+.info-window .address {
+  font-weight: bold;
 }
 </style>
