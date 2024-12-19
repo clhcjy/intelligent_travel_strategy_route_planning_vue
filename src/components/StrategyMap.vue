@@ -96,8 +96,20 @@
         <p>标签：
           <a-tag color="success" class="label" v-for="item in pointDetail.tags" :key="item">{{ item }}</a-tag>
         </p>
-        <a-input v-model:value="searchText" placeholder="搜索附近"
-          @pressEnter="searchNearby(pointDetail.lng, pointDetail.lat)" />
+        <a-select v-model:value="searchText" placeholder="选择标签" :get-popup-container="(triggerNode) => triggerNode.parentNode" @change="searchNearby(pointDetail.lng, pointDetail.lat)" style="width: 100%">
+          <a-select-option value="美食">美食</a-select-option>
+          <a-select-option value="银行">银行</a-select-option>
+          <a-select-option value="商场">商场</a-select-option>
+          <a-select-option value="公园">公园</a-select-option>
+          <a-select-option value="酒店">酒店</a-select-option>
+          <a-select-option value="医院">医院</a-select-option>
+          <a-select-option value="学校">学校</a-select-option>
+          <a-select-option value="加油站">加油站</a-select-option>
+          <a-select-option value="便利店">便利店</a-select-option>
+          <a-select-option value="娱乐场所">娱乐场所</a-select-option>
+        </a-select>
+        <!-- <a-input v-model:value="searchText" placeholder="搜索附近"
+          @pressEnter="searchNearby(pointDetail.lng, pointDetail.lat)" /> -->
       </div>
     </a-drawer>
   </div>
@@ -418,7 +430,7 @@ const searchNearby = (lng, lat) => {
     // 阻止百度地图自动渲染搜索结果
     renderOptions: { map: null, autoViewport: false, panel: "r-result" }
   });
-  local.searchNearby(searchText.value, point, 100);
+  local.searchNearby(searchText.value, point, 10);
 };
 
 onMounted(() => {
