@@ -42,7 +42,7 @@
     style="position: absolute; top: 22vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
     v-if="points.length > 0 && isProject == true && isExpand == true">
     <a-divider style="height: 1px; background-color: #000000" />
-    <a-list item-layout="horizontal" :data-source="points" style="border: #000000">
+    <a-list item-layout="horizontal" :data-source="points" style="border: #000000" :pagination="pagination">
       <template #renderItem="{ item }">
         <a-list-item @click="positionCenter(item)">
           <a-list-item-meta :description="item.lng + '——' + item.lat">
@@ -57,7 +57,7 @@
     <a-divider style="height: 1px; background-color: #000000" />
     <a-button type="link" style="width:30%;float: right;text-align: center;margin-bottom: 10px;"
       @click="addAllPoints">全部添加</a-button>
-      <a-button type="link" style="width:30%;float: right;text-align: center;margin-bottom: 10px;"
+    <a-button type="link" style="width:30%;float: right;text-align: center;margin-bottom: 10px;"
       @click="deleteAllPoints">全部删除</a-button>
   </div>
 
@@ -96,7 +96,8 @@
         <p>标签：
           <a-tag color="success" class="label" v-for="item in pointDetail.tags" :key="item">{{ item }}</a-tag>
         </p>
-        <a-select v-model:value="searchText" placeholder="选择标签" :get-popup-container="(triggerNode) => triggerNode.parentNode" @change="searchNearby(pointDetail.lng, pointDetail.lat)" style="width: 100%">
+        <a-select v-model:value="searchText" placeholder="选择标签"
+          :get-popup-container="(triggerNode) => triggerNode.parentNode" @change="searchNearby" style="width: 100%">
           <a-select-option value="美食">美食</a-select-option>
           <a-select-option value="银行">银行</a-select-option>
           <a-select-option value="商场">商场</a-select-option>
@@ -168,8 +169,16 @@ const DetailPoint = ref(false);
 let id = 0;
 let value = ref('');
 let markers = []; // 用于存储所有标记的数组
+let labels = [];
 let map = null;
 let BMapGL = window.BMapGL;
+
+const pagination = {
+  onChange: (page) => {
+    console.log(page);
+  },
+  pageSize: 3,
+};
 
 const toggleExpand = () => {
   isExpand.value = !isExpand.value;
@@ -332,9 +341,18 @@ const addPoint = (value) => {
   };
 
   map.addEventListener('zoomend', zoomEndHandler);
-
   map.addOverlay(label);
   label.addEventListener('click', function () {
+    // 可以在这里添加点击事件，比如打开一个弹窗
+    map.centerAndZoom(point, 19);
+    map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
+    DetailPoint.value = !DetailPoint.value;
+    pointDetail.value = value;
+    if (DetailPoint.value.tags) { JSON.stringify(value.tags) }
+    console.log(pointDetail.value);
+
+  });
+  marker.addEventListener('click', function () {
     // 可以在这里添加点击事件，比如打开一个弹窗
     map.centerAndZoom(point, 19);
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
@@ -343,6 +361,7 @@ const addPoint = (value) => {
     console.log(pointDetail.value);
 
   });
+  labels.push(label); // 将标记添加到数组中
 
 };
 
@@ -350,9 +369,13 @@ const deletePoint = (item) => {
 
   points.value = points.value.filter(point => point !== item);
   const marker = markers.find(m => m.id === item.id);
-
+  const label = labels.find(m => m.lid === item.id);
   map.removeOverlay(marker);
+  map.removeOverlay(label);
+  // 移除与该标签相关的zoomend事件监听器
+  map.removeEventListener('zoomend', label.zoomEndHandler);
   markers = markers.filter(m => m.id !== item.id); // 从数组中移除对应的marker引用
+  labels = labels.filter(m => m.lid !== item.id); // 从数组中移除对应的marker引用
 };
 
 const addAllPoints = () => {
@@ -380,38 +403,124 @@ const addAllPoints = () => {
 };
 
 const deleteAllPoints = () => {
-  points.value = [];
+  for (let i of points.value) {
+    deletePoint(i);
+  }
+
 };
 
-const searchNearby = (lng, lat) => {
-  var point = new BMapGL.Point(lng, lat);
-  console.log(point);
+const searchNearby = (event) => {
+  console.log("event == ", event);
 
-  var local = new BMapGL.LocalSearch(map, {
-    onSearchComplete: function (results) {
-      results._pois.forEach((item) => {
-        other.value.push({
-          value: item.point,
-          label: item.title,
-          address: item.address,
-          city: item.city,
-          province: item.province,
-          tags: item.tags,
-        });
+  var point = new BMapGL.Point(pointDetail.value.lng, pointDetail.value.lat);
+  api.post("/otherPoints/findByCategory", { point_address: pointDetail.value.address, category: searchText.value }, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }).then(res => {
+    console.log("res == ", res.data);
+
+    if (res.data.length === 0) {
+      message.warning("本地库无关联地址，现进行线上检索");
+      other.value = [];
+      var local = new BMapGL.LocalSearch(map, {
+        onSearchComplete: function (results) {
+          console.log("results == ", results);
+
+          results._pois.forEach((item) => {
+            other.value.push({
+              value: item.point,
+              label: item.title,
+              address: item.address,
+              city: item.city,
+              province: item.province,
+              tags: item.tags,
+            });
+          });
+          console.log("other == ", other);
+          // 渲染到地图
+
+          for (let i of other.value) {
+            console.log("i == ", i);
+
+            let value = {};
+            if (i.tags) {
+              value = {
+                lng: i.value.lng,
+                lat: i.value.lat,
+                title: i.label,
+                point_address: pointDetail.value.address,
+                address: i.address,
+                city: i.city,
+                province: i.province,
+                tags: JSON.stringify(i.tags),
+                category: event
+              }
+            } else {
+              value = {
+                lng: i.value.lng,
+                lat: i.value.lat,
+                title: i.label,
+                point_address: pointDetail.value.address,
+                address: i.address,
+                city: i.city,
+                province: i.province,
+                tags: null,
+                category: event
+              }
+            }
+
+            // 添加到数据库
+            api.post("/otherPoints/insert", { ...value }, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(res => {
+              message.success("添加成功！", res)
+            }).catch(err => {
+              message.error("添加失败！", err)
+            });
+
+
+            addPoint(value);
+            points.value.push({
+              id: id,
+              title: value.title,
+              lng: value.lng,
+              lat: value.lat,
+              address: value.address,
+              city: value.city,
+              province: value.province,
+              tags: JSON.parse(value.tags),
+            })
+          }
+        },
+        // 阻止百度地图自动渲染搜索结果
+        renderOptions: { map: null, autoViewport: false, panel: "r-result" }
       });
-      console.log("other == ", other);
-
+      local.searchNearby(searchText.value, point, 10);
+    } else {
+      message.success("本地库有关联地址，成功！");
+      other.value = res.data.map((item) => {
+        item.label = item.title;
+        item.tags = JSON.parse(item.tags);
+        delete (item.OtherPoints_id);
+        delete (item.point_address);
+        return item;
+      });
+      // 渲染到地图
       for (let i of other.value) {
         let value = {};
         value = {
-          lng: i.value.lng,
-          lat: i.value.lat,
+          lng: i.lng,
+          lat: i.lat,
           title: i.label,
           address: i.address,
           city: i.city,
           province: i.province,
           tags: i.tags
         }
+        console.log("value", value);
 
         addPoint(value);
         points.value.push({
@@ -425,12 +534,13 @@ const searchNearby = (lng, lat) => {
           tags: value.tags
         })
       }
+    }
 
-    },
-    // 阻止百度地图自动渲染搜索结果
-    renderOptions: { map: null, autoViewport: false, panel: "r-result" }
+
+
+  }).catch(err => {
+    message.error("搜索失败！", err)
   });
-  local.searchNearby(searchText.value, point, 10);
 };
 
 onMounted(() => {
@@ -493,6 +603,8 @@ onMounted(() => {
               tags: value.tags
             })
           }
+          let point = new BMapGL.Point(ALLpoints.value[0].lng, ALLpoints.value[0].lat);
+          map.centerAndZoom(point, 15);
         })
       }
 
