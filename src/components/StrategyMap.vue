@@ -63,6 +63,8 @@
 
   <div
     style="position: absolute; bottom: 10px; right: 33%; width: 33%; height: 50px; z-index: 9999; display: flex;align-items: center;justify-content: space-around; background-color: rgba(255, 255, 255, 0.8);border: #000000;border-radius: 10%;">
+
+    <!-- 改变地图样式 -->
     <a-popover v-model:open="visible" trigger="click">
       <template #content>
         <div style="display: flex; justify-content: space-around; background-color: rgba(255, 255, 255, 0.8);">
@@ -76,10 +78,33 @@
           </a-card>
         </div>
       </template>
+
+      <!-- 点击图标打开 -->
       <HighlightTwoTone @click="add" />
     </a-popover>
+
+    <!-- 路线规划导航 -->
+    <a-popover v-model:open="navicatVisible" trigger="click" arrow-point-at-center>
+      <template #content>
+        <div
+          style="display: flex; justify-content: space-around;padding:5px; background-color: rgba(255, 255, 255, 0.8);">
+          <a-popover v-for="item in navicat" :key="item">
+            <template #content>
+              <p>{{ item.vehicle }}</p>
+            </template>
+            <a-card style="margin: 5px;" @click="plan(item.vehicle)">
+              <img :src="item.icon" style="width: 20px;height: 20px;"/>
+            </a-card>
+          </a-popover>
+        </div>
+      </template>
+
+      <!-- 点击图标打开 -->
+      <img src="../../public/navigation.png" style="width: 20px;height: 16px;" @click="navigate" />
+    </a-popover>
+
+    <!-- 返回 -->
     <RollbackOutlined @click="back" />
-    <HighlightTwoTone @click="add" />
     <HighlightTwoTone @click="add" />
     <HighlightTwoTone @click="add" />
   </div>
@@ -96,6 +121,13 @@
         <p>标签：
           <a-tag color="success" class="label" v-for="item in pointDetail.tags" :key="item">{{ item }}</a-tag>
         </p>
+        <div style="justify-content: space-around; width: 100%; display: flex;margin-top: 10px;margin-bottom: 10px;">
+          <a-button @click="SetStartingPoint()" v-if="!isStartingPoint">设为起点</a-button>
+          <a-button @click="DeleteStartingPoint()" v-else-if="isStartingPoint && pointDetail.isStartingPoint">取消起点</a-button>
+          <a-button @click="SetEndPoint()" v-if="!isEndingPoint">设为终点</a-button>
+          <a-button @click="DeleteEndPoint()" v-else-if="isEndingPoint && pointDetail.isEndPoint">取消终点</a-button>
+          <a-button @click="update">最终确定</a-button>
+        </div>
         <a-select v-model:value="searchText" placeholder="选择标签"
           :get-popup-container="(triggerNode) => triggerNode.parentNode" @change="searchNearby" style="width: 100%">
           <a-select-option value="美食">美食</a-select-option>
@@ -157,6 +189,10 @@ const picture = ref(null);
 
 const projectName = ref('');
 
+const isStartingPoint = ref(false);
+
+const isEndingPoint = ref(false);
+
 const pid = ref('');
 
 const isProject = ref(false);
@@ -166,6 +202,15 @@ const style = ref([]);
 const visible = ref(false);
 
 const DetailPoint = ref(false);
+
+const navicatVisible = ref(false);
+
+const navicat = ref([
+  { vehicle: '驾车', icon: "http://192.168.1.47:8082/car.png" },
+  { vehicle: '公交', icon: 'http://192.168.1.47:8082/Bus.png' },
+  { vehicle: '骑行', icon: 'http://192.168.1.47:8082/RIDE.png' },
+  { vehicle: '步行', icon: 'http://192.168.1.47:8082/walk.png' }
+])
 let id = 0;
 let value = ref('');
 let markers = []; // 用于存储所有标记的数组
@@ -173,11 +218,40 @@ let labels = [];
 let map = null;
 let BMapGL = window.BMapGL;
 
+const SetStartingPoint = () => {
+  pointDetail.value.isStartingPoint = true
+  isStartingPoint.value = true
+  pointDetail.value.tags.push("起点")
+};
+
+const SetEndPoint = () => {
+  pointDetail.value.isEndPoint = true
+  isEndingPoint.value = true
+  pointDetail.value.tags.push("终点")
+};
+
+const DeleteStartingPoint = () => {
+  delete(pointDetail.value.isStartingPoint)
+  isStartingPoint.value = false
+  pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("起点"), 1)
+};
+
+const DeleteEndPoint = () => {
+  delete(pointDetail.value.isEndPoint)
+  isEndingPoint.value = false
+  pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("终点"), 1)
+};
+
 const pagination = {
   onChange: (page) => {
     console.log(page);
   },
   pageSize: 3,
+};
+
+const navigate = () => {
+  navicatVisible.value = true;
+  visible.value = false;
 };
 
 const toggleExpand = () => {
@@ -207,9 +281,17 @@ const addProject = () => {
   isProject.value = true;
 }
 
-// const afterOpenChange = () => {
-//   DetailPoint.value = false;
-// };
+const plan = (item) => {
+  if(item === "驾车"){
+    message.info("item == 驾车")
+  }else if(item === "公交"){
+    message.info("item == 公交")
+  }else if(item === "骑行"){
+    message.info("item == 骑行")
+  }else if(item === "步行"){
+    message.info("item == 步行")
+  }
+};
 
 const ToSetMapType = (value) => {
 
@@ -222,6 +304,7 @@ const ToSetMapType = (value) => {
 
 const add = () => {
   visible.value = true;
+  navicatVisible.value = false;
   // map.setMapStyleV2({
   //   styleId: style.value.find(item => item.label == "茶田").id
   // });
@@ -348,7 +431,7 @@ const addPoint = (value) => {
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
-    if (DetailPoint.value.tags) { JSON.stringify(value.tags) }
+    if (DetailPoint.value.tags) { DetailPoint.value.tags = JSON.stringify(value.tags) }
     console.log(pointDetail.value);
 
   });
@@ -376,6 +459,16 @@ const deletePoint = (item) => {
   map.removeEventListener('zoomend', label.zoomEndHandler);
   markers = markers.filter(m => m.id !== item.id); // 从数组中移除对应的marker引用
   labels = labels.filter(m => m.lid !== item.id); // 从数组中移除对应的marker引用
+};
+
+const update = () => {
+  pointDetail.value.tags = JSON.stringify(pointDetail.value.tags);
+  api.post("/points/update", pointDetail.value).then(res => {
+    message.success("修改成功！", res)
+    window.location.reload();
+  }).catch(err => {
+    message.error("修改失败！", err)
+  });
 };
 
 const addAllPoints = () => {
@@ -653,6 +746,8 @@ onMounted(() => {
   border-radius: 3px;
   padding: 2px 5px;
   margin-right: 5px;
+  margin-top: 2px;
+  margin-bottom: 2px;
   font-size: 12px;
   color: #00796b;
 }

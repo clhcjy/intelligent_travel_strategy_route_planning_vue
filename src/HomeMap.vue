@@ -190,7 +190,7 @@ export default defineComponent({
   },
   created() {
     this.rou = null;
-    // this.loadMapScript();
+    //this.loadMapScript();
   },
   watch: {
     // 监听$route对象的变化
