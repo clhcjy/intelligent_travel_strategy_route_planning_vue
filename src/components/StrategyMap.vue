@@ -93,7 +93,7 @@
               <p>{{ item.vehicle }}</p>
             </template>
             <a-card style="margin: 5px;" @click="plan(item.vehicle)">
-              <img :src="item.icon" style="width: 20px;height: 20px;"/>
+              <img :src="item.icon" style="width: 20px;height: 20px;" />
             </a-card>
           </a-popover>
         </div>
@@ -123,10 +123,11 @@
         </p>
         <div style="justify-content: space-around; width: 100%; display: flex;margin-top: 10px;margin-bottom: 10px;">
           <a-button @click="SetStartingPoint()" v-if="!isStartingPoint">设为起点</a-button>
-          <a-button @click="DeleteStartingPoint()" v-else-if="isStartingPoint && pointDetail.isStartingPoint">取消起点</a-button>
+          <a-button @click="DeleteStartingPoint()"
+            v-else-if="isStartingPoint && pointDetail.isStartingPoint">取消起点</a-button>
           <a-button @click="SetEndPoint()" v-if="!isEndingPoint">设为终点</a-button>
           <a-button @click="DeleteEndPoint()" v-else-if="isEndingPoint && pointDetail.isEndPoint">取消终点</a-button>
-          <a-button @click="update">最终确定</a-button>
+          <a-button @click="update" v-if="isupdate">最终确定</a-button>
         </div>
         <a-select v-model:value="searchText" placeholder="选择标签"
           :get-popup-container="(triggerNode) => triggerNode.parentNode" @change="searchNearby" style="width: 100%">
@@ -205,6 +206,8 @@ const DetailPoint = ref(false);
 
 const navicatVisible = ref(false);
 
+const isupdate = ref(false);
+
 const navicat = ref([
   { vehicle: '驾车', icon: "http://192.168.1.47:8082/car.png" },
   { vehicle: '公交', icon: 'http://192.168.1.47:8082/Bus.png' },
@@ -218,27 +221,44 @@ let labels = [];
 let map = null;
 let BMapGL = window.BMapGL;
 
+const StartingPoint = () => {
+  const a = ALLpoints.value.filter((item) => {
+    return item.tags.includes("起点");
+  });
+  return a;
+}
+const EndingPoint = () => {
+  const a = ALLpoints.value.filter((item) => {
+    return item.tags.includes("终点");
+  });
+  return a;
+};
+
 const SetStartingPoint = () => {
   pointDetail.value.isStartingPoint = true
   isStartingPoint.value = true
+  isupdate.value = true
   pointDetail.value.tags.push("起点")
 };
 
 const SetEndPoint = () => {
   pointDetail.value.isEndPoint = true
   isEndingPoint.value = true
+  isupdate.value = true
   pointDetail.value.tags.push("终点")
 };
 
 const DeleteStartingPoint = () => {
-  delete(pointDetail.value.isStartingPoint)
+  delete (pointDetail.value.isStartingPoint)
   isStartingPoint.value = false
+  isupdate.value = false
   pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("起点"), 1)
 };
 
 const DeleteEndPoint = () => {
-  delete(pointDetail.value.isEndPoint)
+  delete (pointDetail.value.isEndPoint)
   isEndingPoint.value = false
+  isupdate.value = false
   pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("终点"), 1)
 };
 
@@ -282,14 +302,46 @@ const addProject = () => {
 }
 
 const plan = (item) => {
-  if(item === "驾车"){
-    message.info("item == 驾车")
-  }else if(item === "公交"){
-    message.info("item == 公交")
-  }else if(item === "骑行"){
-    message.info("item == 骑行")
-  }else if(item === "步行"){
-    message.info("item == 步行")
+  if (item === "驾车") {
+    let a = StartingPoint();
+    let b = EndingPoint();
+    if (a.length === 0) { message.error("请选择起点"); return }
+    else if (b.length === 0) { message.error("请选择终点"); return }
+    else {
+      const other = ALLpoints.value.filter((item) => item.id !== a[0].id && item.id !== b[0].id);
+      console.log("起点是",a);
+      console.log("终点是",b);
+      console.log("其他",other);
+      // 规划路线
+
+    }
+  } else if (item === "公交") {
+    let a = StartingPoint();
+    let b = EndingPoint();
+    if (a.length === 0) { message.error("请选择起点"); return }
+    else if (b.length === 0) { message.error("请选择终点"); return }
+    else {
+      console.log(a, b);
+
+    }
+  } else if (item === "骑行") {
+    let a = StartingPoint();
+    let b = EndingPoint();
+    if (a.length === 0) { message.error("请选择起点"); return }
+    else if (b.length === 0) { message.error("请选择终点"); return }
+    else {
+      console.log(a, b);
+
+    }
+  } else if (item === "步行") {
+    let a = StartingPoint();
+    let b = EndingPoint();
+    if (a.length === 0) { message.error("请选择起点"); return }
+    else if (b.length === 0) { message.error("请选择终点"); return }
+    else {
+      console.log(a, b);
+
+    }
   }
 };
 
@@ -300,6 +352,15 @@ const ToSetMapType = (value) => {
     styleId: style.value.find(item => item.label == value.label).id
   });
   visible.value = false;
+  api.post("/project/update", { pid: pid.value, category: value.label }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(res => {
+    setTimeout(() => {
+      message.success("修改地图类型成功", res);
+    }, 1000);
+  })
 }
 
 const add = () => {
@@ -431,8 +492,19 @@ const addPoint = (value) => {
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
-    if (DetailPoint.value.tags) { DetailPoint.value.tags = JSON.stringify(value.tags) }
     console.log(pointDetail.value);
+
+    if (Array.isArray(pointDetail.value.tags) && pointDetail.value.tags.length > 0) {
+      for (let i of pointDetail.value.tags) {
+        console.log(i);
+        if (i == "起点") { isStartingPoint.value = true }
+        else if (i == "终点") { isEndingPoint.value = true }
+        else {
+          isStartingPoint.value = false;
+          isEndingPoint.value = false;
+        }
+      }
+    }
 
   });
   marker.addEventListener('click', function () {
@@ -667,7 +739,7 @@ onMounted(() => {
     //   afterOpenChange();
     // });
     map.addEventListener('tilesloaded', function () {
-      // alert('地图加载完成！');
+      // message.success("地图加载完成！");
       if (ALLpoints.value.length === 0) {
         api.post('/points/findByPid', { pid: pid.value }, {
           headers: {
@@ -675,14 +747,33 @@ onMounted(() => {
           }
         }).then(res => {
           for (let i of res.data) {
+
+            // 尝试将 JSON 字符串转换为 JavaScript 数组
+            let tagsArray;
+            try {
+
+              tagsArray = JSON.parse(i.tags);
+              // 检查转换后的结果是否为数组
+              if (!Array.isArray(tagsArray)) {
+                console.error('需要一个数组，但得到:', tagsArray);
+                // 这里可以处理错误，或者给 tagsArray 一个默认值，例如一个空数组
+                tagsArray = [];
+              }
+            } catch (error) {
+              console.error('解析JSON失败:', error);
+              // 在这里处理 JSON 解析错误，或者给 tagsArray 一个默认值
+              tagsArray = [];
+            }
+
             const value = {
+              position_id: i.position_id,
               lng: i.lng,
               lat: i.lat,
               title: i.title,
               address: i.address,
               city: i.city,
               province: i.province,
-              tags: JSON.parse(i.tags)
+              tags: tagsArray
             }
             addPoint(value);
             ALLpoints.value.push({
@@ -696,8 +787,11 @@ onMounted(() => {
               tags: value.tags
             })
           }
-          let point = new BMapGL.Point(ALLpoints.value[0].lng, ALLpoints.value[0].lat);
-          map.centerAndZoom(point, 15);
+          if (ALLpoints.value.length > 0) {
+            let point = new BMapGL.Point(ALLpoints.value[0].lng, ALLpoints.value[0].lat);
+            console.log(point);
+            map.centerAndZoom(point, 15);
+          }
         })
       }
 
