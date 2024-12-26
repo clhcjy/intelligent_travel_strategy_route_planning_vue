@@ -29,6 +29,15 @@
   </div>
 
   <div
+    style="position: absolute; top: 80px;height: 20vh; z-index: 9999;display: flex;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
+    v-if="htmls.length > 0">
+    <div v-html="htmls[htmllong].html"></div>
+    <a-button @click="htmls = []" type="link">关闭</a-button>
+    <a-button @click="htmllong ++" v-if="htmllong < htmls.length - 1" type="link">前往下一地点{{ htmllong }}</a-button>
+  </div>
+
+
+  <div
     style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #fff;"
     v-if="points.length > 0 && isProject == true">
     <a @click="toggleExpand" v-if="isExpand === true">
@@ -150,12 +159,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref,reactive } from 'vue';
 import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined } from '@ant-design/icons-vue';
 import api from '@/api/request.js';
 import { message } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
+// import MapVgl from '@mapvgl/mapvgl';
 
 const container = ref(null);
 
@@ -208,6 +218,10 @@ const navicatVisible = ref(false);
 
 const isupdate = ref(false);
 
+const htmls = reactive([]);
+
+let htmllong = reactive(0);
+
 const navicat = ref([
   { vehicle: '驾车', icon: "http://192.168.1.47:8082/car.png" },
   { vehicle: '公交', icon: 'http://192.168.1.47:8082/Bus.png' },
@@ -232,6 +246,52 @@ const EndingPoint = () => {
     return item.tags.includes("终点");
   });
   return a;
+};
+
+// 计算两点之间的距离
+const calculateDistance = (point1, point2) => {
+
+
+  return Math.sqrt(Math.pow(point1.lng - point2.lng, 2) + Math.pow(point1.lat - point2.lat, 2));
+};
+
+// 找到其他点与起点最近的点
+const findClosestPoint = (currentPoint, points) => {
+  let closestPoint = null;
+
+  // 初始化最小距离为正无穷大
+  let minDistance = Infinity;
+
+  points.forEach(point => {
+    const distance = calculateDistance(currentPoint, point);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestPoint = point;
+    }
+  });
+
+  return closestPoint;
+}
+
+// 计划路线
+const planRoute = (a, b, other) => {
+  let currentPoint = a;
+  let newPoints = [a]; // 起点加入新路径
+
+  while (other.length > 0) {
+    const closestPoint = findClosestPoint(currentPoint, other);
+    if (!closestPoint) break; // 如果没有找到最近的点，跳出循环
+
+    newPoints.push(closestPoint); // 将最近的点加入路径
+    other = other.filter(point => point !== closestPoint); // 从候选点中移除已加入路径的点
+
+    currentPoint = closestPoint; // 更新当前点
+
+    if (currentPoint === b) break; // 如果当前点是终点，结束循环
+  }
+
+  newPoints.push(b); // 终点加入新路径
+  return newPoints; // 返回构建的路径
 };
 
 const SetStartingPoint = () => {
@@ -301,48 +361,94 @@ const addProject = () => {
   isProject.value = true;
 }
 
-const plan = (item) => {
-  if (item === "驾车") {
-    let a = StartingPoint();
-    let b = EndingPoint();
-    if (a.length === 0) { message.error("请选择起点"); return }
-    else if (b.length === 0) { message.error("请选择终点"); return }
-    else {
-      const other = ALLpoints.value.filter((item) => item.id !== a[0].id && item.id !== b[0].id);
-      console.log("起点是",a);
-      console.log("终点是",b);
-      console.log("其他",other);
-      // 规划路线
+const formData = (seconds) => {
+  let days = Math.floor(seconds / (24 * 3600));
+  seconds %= (24 * 3600);
+  let hours = Math.floor(seconds / 3600);
+  seconds %= 3600;
+  let minutes = Math.floor(seconds / 60);
+  seconds %= 60;
+  if (days == 0 && hours != 0 && minutes != 0) {
+    return `${hours}小时${minutes}分钟${seconds}秒`
+  } else if (days == 0 && hours == 0 && minutes != 0) {
+    return `${minutes}分钟${seconds}秒`
+  } else if (days == 0 && hours == 0 && minutes == 0) {
+    return `${seconds}秒`
+  } else {
+    return `${days}天${hours}小时${minutes}分钟${seconds}秒`
+  }
+};
 
+const vehicle = (category) => {
+  let aList = StartingPoint();
+  let bList = EndingPoint();
+  if (aList.length === 0) { message.error("请选择起点"); return }
+  else if (bList.length === 0) { message.error("请选择终点"); return }
+  else {
+    const otherList = ALLpoints.value.filter((item) => item.id !== aList[0].id && item.id !== bList[0].id);
+    let other = otherList.map((item) => {
+      return {
+        lng: item.lng,
+        lat: item.lat
+      };
+    });
+    let a = {
+      lng: aList[0].lng,
+      lat: aList[0].lat
+    };
+    let b = {
+      lng: bList[0].lng,
+      lat: bList[0].lat
+    };
+    console.log("起点是", a);
+    console.log("终点是", b);
+    console.log("其他", other);
+    // 规划路线
+    const newPoints = planRoute(a, b, other);
+    for (let i = 0; i < newPoints.length - 1; i++) {
+      let start = newPoints[i];
+      let end = newPoints[parseInt(i) + 1];
+      console.log(start, end);
+      var p1 = new BMapGL.Point(start.lng, start.lat);
+      var p2 = new BMapGL.Point(end.lng, end.lat);
+      if (category === "驾车") {
+        // 驾车规划
+        var driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+        driving.search(p1, p2);
+      } else if (category === "公交") {
+        // 公交规划
+        const BMAP_STATUS_SUCCESS = "0";
+        var transit = new BMapGL.TransitRoute(map, {
+          renderOptions: { map: map },
+          onSearchComplete: function (results) {
+            if (transit.getStatus() == BMAP_STATUS_SUCCESS) {
+
+              var plan = results._plans; // 获取第一个方案
+              console.log('方案：', plan);
+
+              // 可以获取方案的详细信息，例如总时长和总路程
+              console.log('总时长：', formData(plan[i]._duration)); // 获取时间
+              let mi = plan[i]._distance / 1000
+              console.log('总路程：', mi + "公里"); // 获取距离
+              htmls.push({ html: "方案：" + plan[i]._description + "<br>总时长：" + formData(plan[i]._duration) + "<br>总路程：" + mi + "公里<br>" });
+            } else {
+              console.log('搜索失败，状态码：' + transit.getStatus());
+              htmls.push({html:"<br>搜索失败"});
+            }
+          },
+        });
+
+        transit.search(p1, p2);
+      }
     }
-  } else if (item === "公交") {
-    let a = StartingPoint();
-    let b = EndingPoint();
-    if (a.length === 0) { message.error("请选择起点"); return }
-    else if (b.length === 0) { message.error("请选择终点"); return }
-    else {
-      console.log(a, b);
-
-    }
-  } else if (item === "骑行") {
-    let a = StartingPoint();
-    let b = EndingPoint();
-    if (a.length === 0) { message.error("请选择起点"); return }
-    else if (b.length === 0) { message.error("请选择终点"); return }
-    else {
-      console.log(a, b);
-
-    }
-  } else if (item === "步行") {
-    let a = StartingPoint();
-    let b = EndingPoint();
-    if (a.length === 0) { message.error("请选择起点"); return }
-    else if (b.length === 0) { message.error("请选择终点"); return }
-    else {
-      console.log(a, b);
-
+    for (let i in htmls) {
+      console.log("=======================", htmls[i]);
     }
   }
+}
+
+const plan = (item) => {
+  vehicle(item)
 };
 
 const ToSetMapType = (value) => {
@@ -492,11 +598,9 @@ const addPoint = (value) => {
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
-    console.log(pointDetail.value);
 
     if (Array.isArray(pointDetail.value.tags) && pointDetail.value.tags.length > 0) {
       for (let i of pointDetail.value.tags) {
-        console.log(i);
         if (i == "起点") { isStartingPoint.value = true }
         else if (i == "终点") { isEndingPoint.value = true }
         else {
@@ -513,7 +617,6 @@ const addPoint = (value) => {
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
-    console.log(pointDetail.value);
 
   });
   labels.push(label); // 将标记添加到数组中
@@ -575,7 +678,6 @@ const deleteAllPoints = () => {
 };
 
 const searchNearby = (event) => {
-  console.log("event == ", event);
 
   var point = new BMapGL.Point(pointDetail.value.lng, pointDetail.value.lat);
   api.post("/otherPoints/findByCategory", { point_address: pointDetail.value.address, category: searchText.value }, {
@@ -583,14 +685,12 @@ const searchNearby = (event) => {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }).then(res => {
-    console.log("res == ", res.data);
 
     if (res.data.length === 0) {
       message.warning("本地库无关联地址，现进行线上检索");
       other.value = [];
       var local = new BMapGL.LocalSearch(map, {
         onSearchComplete: function (results) {
-          console.log("results == ", results);
 
           results._pois.forEach((item) => {
             other.value.push({
@@ -602,11 +702,9 @@ const searchNearby = (event) => {
               tags: item.tags,
             });
           });
-          console.log("other == ", other);
           // 渲染到地图
 
           for (let i of other.value) {
-            console.log("i == ", i);
 
             let value = {};
             if (i.tags) {
@@ -685,7 +783,6 @@ const searchNearby = (event) => {
           province: i.province,
           tags: i.tags
         }
-        console.log("value", value);
 
         addPoint(value);
         points.value.push({
@@ -709,6 +806,7 @@ const searchNearby = (event) => {
 };
 
 onMounted(() => {
+  // const MapVGL = require('mapvgl/dist/mapvgl.min.js');
   style.value = [
     { id: "ad57d26a4c2ae1ad9886b19395ea2a76", label: "原版" },
     { id: "ca493665f0465225899b802fbf5f5f3e", label: "茶田" },
@@ -789,13 +887,20 @@ onMounted(() => {
           }
           if (ALLpoints.value.length > 0) {
             let point = new BMapGL.Point(ALLpoints.value[0].lng, ALLpoints.value[0].lat);
-            console.log(point);
             map.centerAndZoom(point, 15);
           }
         })
       }
 
     });
+    // // 初始化MapVgl
+    // const mapVgl = new MapVGL.MapGL({
+    //   container: container.value,
+    //   map: map,
+    //   zoom: [11, 19]
+    // });
+    // console.log(mapVgl);
+
   }
   isProject.value = true;
   pid.value = route.query.pid;
