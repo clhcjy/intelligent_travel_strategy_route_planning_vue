@@ -31,11 +31,10 @@
   <div
     style="position: absolute; top: 80px;height: 20vh; z-index: 9999;display: flex;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
     v-if="htmls.length > 0">
-    <div v-html="htmls[htmllong].html"></div>
-    <a-button @click="htmls = []" type="link">关闭</a-button>
-    <a-button @click="htmllong ++" v-if="htmllong < htmls.length - 1" type="link">前往下一地点{{ htmllong }}</a-button>
+    <div v-for="item in htmls" :key="item">
+    <div v-html="item.html"></div></div>
+    <a-button @click="html=[]" type="link">关闭</a-button>
   </div>
-
 
   <div
     style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #fff;"
@@ -159,7 +158,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref,reactive } from 'vue';
+import { onMounted, ref } from 'vue';
 import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined } from '@ant-design/icons-vue';
 import api from '@/api/request.js';
 import { message } from 'ant-design-vue';
@@ -218,9 +217,7 @@ const navicatVisible = ref(false);
 
 const isupdate = ref(false);
 
-const htmls = reactive([]);
-
-let htmllong = reactive(0);
+const htmls = ref([]);
 
 const navicat = ref([
   { vehicle: '驾车', icon: "http://192.168.1.47:8082/car.png" },
@@ -424,16 +421,16 @@ const vehicle = (category) => {
             if (transit.getStatus() == BMAP_STATUS_SUCCESS) {
 
               var plan = results._plans; // 获取第一个方案
-              console.log('方案：', plan);
+              console.log('方案：', plan[i]);
 
               // 可以获取方案的详细信息，例如总时长和总路程
               console.log('总时长：', formData(plan[i]._duration)); // 获取时间
               let mi = plan[i]._distance / 1000
               console.log('总路程：', mi + "公里"); // 获取距离
-              htmls.push({ html: "方案：" + plan[i]._description + "<br>总时长：" + formData(plan[i]._duration) + "<br>总路程：" + mi + "公里<br>" });
+              htmls.value.push ({html: "方案：" + plan[i]._description + "<br>总时长：" + formData(plan[i]._duration) + "<br>总路程：" + mi + "公里<br>"});
             } else {
               console.log('搜索失败，状态码：' + transit.getStatus());
-              htmls.push({html:"<br>搜索失败"});
+              htmls.value.push ( "<br>搜索失败，状态码：" + transit.getStatus());
             }
           },
         });
@@ -441,9 +438,8 @@ const vehicle = (category) => {
         transit.search(p1, p2);
       }
     }
-    for (let i in htmls) {
-      console.log("=======================", htmls[i]);
-    }
+    console.log("htmls",htmls);
+    
   }
 }
 
