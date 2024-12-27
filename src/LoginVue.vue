@@ -96,7 +96,7 @@ export default {
       headers: {
         Authorization: 'Bearer your-token-here', // 如果需要的话
       },
-      uploadUrl: 'http://192.168.1.47:8080/upload/User',
+      uploadUrl: 'http://192.168.1.47:8081/upload/User',
       loginForm: {
         username: '',
         password: '',
@@ -177,10 +177,13 @@ export default {
       }
       if (status === 'done') {
         console.log("response", response);
-        const i = response.split('+')
-        this.registerForm.avatarUrl = i[1]
-        this.imageUrl = i[1]
+        const i = response.split(':')
+        i.shift();
+        this.registerForm.avatarUrl = i.join(':');
+        this.imageUrl = i.join(':');
         this.$message.success(`${info.file.name} 文件上传成功.`);
+        console.log("imageUrl", i);
+        
       } else if (status === 'error') {
         this.$message.error(`${info.file.name} 文件上传失败.`);
       }

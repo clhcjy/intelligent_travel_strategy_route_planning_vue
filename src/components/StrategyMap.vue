@@ -28,13 +28,14 @@
     </div>
   </div>
 
-  <div
+  <!-- <div
     style="position: absolute; top: 80px;height: 20vh; z-index: 9999;display: flex;background-color: rgba(255, 255, 255, 0.8);border: #000000;"
     v-if="htmls.length > 0">
     <div v-for="item in htmls" :key="item">
-    <div v-html="item.html"></div></div>
-    <a-button @click="html=[]" type="link">关闭</a-button>
-  </div>
+      <div v-html="item.html"></div>
+    </div>
+    <a-button @click="htmls = []" type="link">关闭</a-button>
+  </div> -->
 
   <div
     style="position: absolute; top: 20vh; right: 10px;width:30%; z-index: 9999;display: inline;background-color: rgba(255, 255, 255, 0.8);border: #fff;"
@@ -217,7 +218,7 @@ const navicatVisible = ref(false);
 
 const isupdate = ref(false);
 
-const htmls = ref([]);
+// const htmls = ref([]);
 
 const navicat = ref([
   { vehicle: '驾车', icon: "http://192.168.1.47:8082/car.png" },
@@ -358,23 +359,23 @@ const addProject = () => {
   isProject.value = true;
 }
 
-const formData = (seconds) => {
-  let days = Math.floor(seconds / (24 * 3600));
-  seconds %= (24 * 3600);
-  let hours = Math.floor(seconds / 3600);
-  seconds %= 3600;
-  let minutes = Math.floor(seconds / 60);
-  seconds %= 60;
-  if (days == 0 && hours != 0 && minutes != 0) {
-    return `${hours}小时${minutes}分钟${seconds}秒`
-  } else if (days == 0 && hours == 0 && minutes != 0) {
-    return `${minutes}分钟${seconds}秒`
-  } else if (days == 0 && hours == 0 && minutes == 0) {
-    return `${seconds}秒`
-  } else {
-    return `${days}天${hours}小时${minutes}分钟${seconds}秒`
-  }
-};
+// const formData = (seconds) => {
+//   let days = Math.floor(seconds / (24 * 3600));
+//   seconds %= (24 * 3600);
+//   let hours = Math.floor(seconds / 3600);
+//   seconds %= 3600;
+//   let minutes = Math.floor(seconds / 60);
+//   seconds %= 60;
+//   if (days == 0 && hours != 0 && minutes != 0) {
+//     return `${hours}小时${minutes}分钟${seconds}秒`
+//   } else if (days == 0 && hours == 0 && minutes != 0) {
+//     return `${minutes}分钟${seconds}秒`
+//   } else if (days == 0 && hours == 0 && minutes == 0) {
+//     return `${seconds}秒`
+//   } else {
+//     return `${days}天${hours}小时${minutes}分钟${seconds}秒`
+//   }
+// };
 
 const vehicle = (category) => {
   let aList = StartingPoint();
@@ -414,32 +415,15 @@ const vehicle = (category) => {
         driving.search(p1, p2);
       } else if (category === "公交") {
         // 公交规划
-        const BMAP_STATUS_SUCCESS = "0";
-        var transit = new BMapGL.TransitRoute(map, {
-          renderOptions: { map: map },
-          onSearchComplete: function (results) {
-            if (transit.getStatus() == BMAP_STATUS_SUCCESS) {
-
-              var plan = results._plans; // 获取第一个方案
-              console.log('方案：', plan[i]);
-
-              // 可以获取方案的详细信息，例如总时长和总路程
-              console.log('总时长：', formData(plan[i]._duration)); // 获取时间
-              let mi = plan[i]._distance / 1000
-              console.log('总路程：', mi + "公里"); // 获取距离
-              htmls.value.push ({html: "方案：" + plan[i]._description + "<br>总时长：" + formData(plan[i]._duration) + "<br>总路程：" + mi + "公里<br>"});
-            } else {
-              console.log('搜索失败，状态码：' + transit.getStatus());
-              htmls.value.push ( "<br>搜索失败，状态码：" + transit.getStatus());
-            }
-          },
-        });
-
-        transit.search(p1, p2);
+        var bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true }, });
+        bus.search(p1, p2);
+      } else if (category === "步行") {
+        var walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+        walking.search(p1, p2);
+      } else {
+        walking.clearResults();
       }
     }
-    console.log("htmls",htmls);
-    
   }
 }
 
