@@ -117,8 +117,10 @@
     <HighlightTwoTone @click="add" />
     <HighlightTwoTone @click="add" />
   </div>
+
+  <!-- 抽屉 -->
   <div
-    style="position: absolute; top: 30vh; left: 10px; width: 20%; height: 50vh; z-index: 9999; display: flex;align-items: center;justify-content: space-around; background-color: transparent;border: #000000;"
+    style="position: absolute; top: 30vh; left: 10px; width: 40%; height: 50vh; z-index: 9999; display: flex;align-items: center;justify-content: space-around; background-color: transparent;border: #000000;overflow-y: auto;"
     v-show="DetailPoint">
     <a-drawer v-model:open="DetailPoint" class="custom-class" root-class-name="root-class-name"
       :root-style="{ color: 'blue' }" style="color: red;" :title="pointDetail.title" :get-container="false"
@@ -154,7 +156,31 @@
         <!-- <a-input v-model:value="searchText" placeholder="搜索附近"
           @pressEnter="searchNearby(pointDetail.lng, pointDetail.lat)" /> -->
       </div>
+      <div class="info-window">
+        <div style="text-align: center;color: #000000;">
+          <h4>必看推荐</h4>
+          <div style="width:300px;display: flex;flex-wrap: wrap;">
+            <a-card v-for="(item, index) in recommendation" :key="index" style="width: 100px;margin: 10px;">
+              <template #cover>
+                <img alt="example"
+                  :src="'http://192.168.94.231:8082/' + item.link" />
+              </template>
+              <a-card-meta :title="item.title">
+                <template #description>
+                  <div style="white-space: nowrap; /* 不换行 */
+                              overflow: hidden; /* 超出部分隐藏 */
+                              text-overflow: ellipsis; /* 超出部分显示省略号 */
+                              width: 100%; /* 设置宽度 */">
+                    {{ item.content }}
+                  </div>
+                </template>
+              </a-card-meta>
+            </a-card>
+          </div>
+        </div>
+      </div>
     </a-drawer>
+
   </div>
 </template>
 
@@ -196,6 +222,8 @@ const points = ref([]);
 
 const ALLpoints = ref([]);
 
+const recommendation = ref([]);
+
 const picture = ref(null);
 
 const projectName = ref('');
@@ -221,10 +249,10 @@ const isupdate = ref(false);
 // const htmls = ref([]);
 
 const navicat = ref([
-  { vehicle: '驾车', icon: "http://192.168.1.47:8082/car.png" },
-  { vehicle: '公交', icon: 'http://192.168.1.47:8082/Bus.png' },
-  { vehicle: '骑行', icon: 'http://192.168.1.47:8082/RIDE.png' },
-  { vehicle: '步行', icon: 'http://192.168.1.47:8082/walk.png' }
+  { vehicle: '驾车', icon: "http://192.168.108.231:8082/car.png" },
+  { vehicle: '公交', icon: 'http://192.168.108.231:8082/Bus.png' },
+  { vehicle: '骑行', icon: 'http://192.168.108.231:8082/RIDE.png' },
+  { vehicle: '步行', icon: 'http://192.168.108.231:8082/walk.png' }
 ])
 let id = 0;
 let value = ref('');
@@ -232,6 +260,17 @@ let markers = []; // 用于存储所有标记的数组
 let labels = [];
 let map = null;
 let BMapGL = window.BMapGL;
+
+const recomend = (title) => {
+  api.post("/resources/recommend", { title: title }, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(res => {
+    console.log(res.data);
+    recommendation.value = res.data.map((item, index) => {
+      item.index = index + 1;
+      return item;
+    })
+    console.log("必看推荐", recommendation.value);
+  })
+};
 
 const StartingPoint = () => {
   const a = ALLpoints.value.filter((item) => {
@@ -529,7 +568,7 @@ const addPoint = (value) => {
   const point = new BMapGL.Point(value.lng, value.lat);
   const title = value.title;
   // 创建自定义的覆盖物图标
-  var myIcon = new BMapGL.Icon("http://192.168.1.47:8082/redpoint.png", new BMapGL.Size(23, 25), {
+  var myIcon = new BMapGL.Icon("http://192.168.108.231:8082/redpoint.png", new BMapGL.Size(23, 25), {
     imageSize: new BMapGL.Size(23, 25),
     imageOffset: new BMapGL.Size(0, 0) // 根据需要设置偏移量
   });
@@ -578,7 +617,7 @@ const addPoint = (value) => {
     map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
     DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
-
+    recomend(pointDetail.value.title);
     if (Array.isArray(pointDetail.value.tags) && pointDetail.value.tags.length > 0) {
       for (let i of pointDetail.value.tags) {
         if (i == "起点") { isStartingPoint.value = true }
@@ -906,6 +945,7 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   padding: 10px;
   max-width: 300px;
+  margin-bottom: 10px;
 }
 
 .info-window h2 {

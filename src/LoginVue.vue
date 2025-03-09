@@ -96,7 +96,7 @@ export default {
       headers: {
         Authorization: 'Bearer your-token-here', // 如果需要的话
       },
-      uploadUrl: 'http://192.168.1.47:8081/upload/User',
+      uploadUrl: 'http://192.168.94.231:8081/upload/User',
       loginForm: {
         username: '',
         password: '',
@@ -152,6 +152,19 @@ export default {
       // 处理注册逻辑
       api.post("/register", { username: this.registerForm.username, password: this.registerForm.password, avatarUrl: this.registerForm.avatarUrl }).then(() => {
         message.success("注册成功")
+        api.post("/login", { username: this.registerForm.username, password: this.registerForm.password }).then(res => {
+          if (res.data === '') {
+            message.error("登录失败：用户名或者密码错误")
+          }
+          else {
+            message.success("登录成功");
+            console.log(res.data.id);
+            localStorage.setItem('userId', JSON.stringify(res.data.id)); // 保存变量到localStorage
+            this.$router.push({ path: `/HomeMap/${res.data.id}` });
+          }
+        }).catch(err => {
+          message.error("登录失败：", err)
+        })
       }).catch(err => {
         message.error("注册失败：", err)
       })
@@ -183,7 +196,7 @@ export default {
         this.imageUrl = i.join(':');
         this.$message.success(`${info.file.name} 文件上传成功.`);
         console.log("imageUrl", i);
-        
+
       } else if (status === 'error') {
         this.$message.error(`${info.file.name} 文件上传失败.`);
       }

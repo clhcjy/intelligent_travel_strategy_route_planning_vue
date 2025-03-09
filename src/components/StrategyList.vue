@@ -1,5 +1,5 @@
 <template>
-    <div v-if="projects.length > 0" class="card-wrapper" @click="handleClickOutside">
+    <div class="card-wrapper" @click="handleClickOutside">
         <a-card :loading="loading" hoverable v-for="(item, index) in projects" :key="index"
             style="width: 200px;margin: 20px;height: 250px;">
             <template #cover>
@@ -29,6 +29,9 @@
             <a-card-meta :title="item.projectName" class="ellipsis">
             </a-card-meta>
         </a-card>
+        <div style="width: 200px;margin: 20px;height: 250px;">
+            <button style="margin: 50% 25%;" @click="addproject">添加项目</button>
+        </div>
     </div>
 </template>
 <script setup>
@@ -45,15 +48,17 @@ const editValuePicture = ref(null);
 const projects = ref([]);
 const editValue = ref(null);
 const fileList = ref([]);
-const uploadUrl = 'http://192.168.1.47:8081/upload/User';
+const uploadUrl = 'http://192.168.94.231:8081/upload/User';
 const headers = {
     Authorization: 'Bearer your-token-here', // 如果需要的话
 };
 const imageUrl = ref(null);
 
+
+// const other = null;
 const toMap = (item) => {
-    console.log("item",item);
-    router.push({ name: 'StrategyMap', query: { pid: item.pid, projectName: item.projectName, picture: item.picture,category: item.category } });
+    console.log("item", item);
+    router.push({ name: 'StrategyMap', query: { pid: item.pid, projectName: item.projectName, picture: item.picture, category: item.category } });
 };
 
 const handleUploadChange = ({ file, fileList }) => {
@@ -66,7 +71,7 @@ const handleUploadChange = ({ file, fileList }) => {
     if (status === 'done') {
         console.log("response", response);
         const a = response.split(':');
-        const b = a[1]+":"+a[2]+":"+a[3];
+        const b = a[1] + ":" + a[2] + ":" + a[3];
         const i = b;
         let item = projects.value.find(item => item.pid === editValuePicture.value)
         item.picture = i;
@@ -82,7 +87,7 @@ const handleUploadChange = ({ file, fileList }) => {
         })
         imageUrl.value = file.name
         console.log("imageUrl", imageUrl);
-        
+
         message.success(`${file.name} 文件上传成功.`);
     } else if (status === 'error') {
         message.error(`${file.name} 文件上传失败.`);
@@ -135,15 +140,38 @@ const beforeUpload = (file) => {
     return isJpgOrPng && isLt2M;
 };
 
+const addproject = () => {
+    api.post("/project/insert",{uid:localStorage.getItem('userId'),projectName:"请输入项目名……"},{
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    }).then(res =>{
+        projects.value.push({
+            uid:res.data.uid,
+            projectName:res.data.projectName,
+            pid:res.data.pid,
+            picture:res.data.picture,
+            category:res.data.category
+        })
+    })
+};
+
 onMounted(() => {
     api.post("/project/searchByUid", { uid: localStorage.getItem('userId') }, {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     }).then(res => {
+        // if (res.data != []) {
+        //     other.value = 1;
+        // }
+        // else {
+        //     other.value = 0;
+        // }
         projects.value = res.data.map((item) => {
             return item;
         })
+
         loading.value = false;
     }).catch(error => {
         message.error("获取数据失败:", error);
@@ -153,7 +181,6 @@ onMounted(() => {
 <style scoped>
 .card-wrapper {
     width: 100%;
-    height: 100vh;
     display: flex;
     flex-wrap: wrap;
 }

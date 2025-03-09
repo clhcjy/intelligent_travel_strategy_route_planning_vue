@@ -124,7 +124,7 @@ def get_content(num,keyword):
 
 def main():
     # 假设我们从命令行参数获取URL
-    params = '潮汕娱乐'
+    params = '深圳'
     # 执行爬虫逻辑
     keyword = params;
     num = input("请输入爬取页数：")
@@ -138,7 +138,7 @@ def main():
     # 创建DataFrame对象并保存到Excel
     df = pd.DataFrame(data=contents, columns=name)
     # 构建保存Excel文件的完整路径
-    excel_path = os.path.join(save_dir, 'amusement.xlsx')
+    excel_path = os.path.join(save_dir, 'shenzhen.xlsx')
     df.to_excel(excel_path, index=False)
 
 

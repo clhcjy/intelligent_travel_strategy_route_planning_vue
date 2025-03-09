@@ -14,6 +14,7 @@
         <a-menu-item key="2">nav 2</a-menu-item>
         <a-menu-item key="3">nav 3</a-menu-item>
         <a-menu-item key="4">light</a-menu-item>
+        <a-menu-item key="5" style="margin-left: auto;" @click="toLogin">注销</a-menu-item>
       </a-menu>
       <!-- <div style="float: right; padding: 0 24px;text-align: center;font-size: large;">{{ user.username }}</div> -->
     </a-layout-header>
@@ -103,6 +104,11 @@ export default defineComponent({
     }
   },
   methods: {
+    toLogin(){
+      this.$router.push({name:`login`});
+      localStorage.clear();
+    },
+
     toData() {
       this.rou = 'menu'
       this.$router.push({ name: `StrategyData` });
