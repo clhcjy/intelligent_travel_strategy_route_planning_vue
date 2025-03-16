@@ -11,6 +11,11 @@ const routes = [
     component: () => import('@/HomeMap.vue'),
     children:[
       {
+        path: '/StrategyLiveness',
+        name: 'StrategyLiveness',
+        component: () => import('@/components/StrategyLiveness.vue')
+      },
+      {
         path: '/StrategyAi',
         name: 'StrategyAi',
         component: () => import('@/components/StrategyAi.vue')
@@ -51,6 +56,11 @@ const routes = [
         path: '/DetailFication',
         name: 'DetailFication',
         component: () => import('@/components/DetailFication.vue'),
+      },
+      {
+        path: '/PersonalCenter',
+        name: 'PersonalCenter',
+        component: () => import('@/components/PersonalCenter.vue'),
       }
     ]
   },

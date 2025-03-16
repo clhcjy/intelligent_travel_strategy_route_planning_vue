@@ -125,6 +125,12 @@ export default {
           console.log(res.data.id);
           localStorage.setItem('userId', JSON.stringify(res.data.id)); // 保存变量到localStorage
           this.$router.push({ path: `/HomeMap/${res.data.id}` });
+          api.post("/record/insert", { uid: res.data.id },{headers:{
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }}).then(res => {
+            console.log("保存成功",res.data);
+            
+          })
         }
       }).catch(err => {
         message.error("登录失败：", err)

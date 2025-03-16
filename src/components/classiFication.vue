@@ -1,7 +1,7 @@
 <template>
     <div></div>
     <a-page-header style="border: 1px solid rgb(235, 237, 240)" :title="'资源'"
-        @back="() => $router.push({ path: '/HomeMap' })">
+        @back= goBack()>
         <template #extra>
             <a-input placeholder="搜索" v-model:value="searchText" @pressEnter="callPythonScript()" />
         </template>
@@ -35,12 +35,41 @@ const loading = ref(true);
 
 let href = ref('');
 
+const goBack = () => {
+    router.go(-1);
+    let h = JSON.parse(localStorage.getItem('newRoute')).hash;
+    if(h != ''){
+        href.value = h;
+        console.log(href.value);
+        
+        readExcel(href.value);
+        getCurrentAnchor();
+    }
+};
+
 const handleClick = (e, link) => {
+    e.preventDefault(); // 阻止默认行为
     href.value = link.href;
-    readExcel(link.href);
+    readExcel(href.value);
 };
 
 const callPythonScript = () => {
+        resources.value = [];
+    api.post('/resources/title', { title: searchText.value}, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }).then(res => {
+        // console.log(res.data);
+        resources.value = [];
+        resources.value = res.data.map((item, index) => {
+            item.index = index + 1;
+            item.content =  item.content.replace(/(?<!\n) /g, "\n");
+            return item;
+        })
+        loading.value = false;
+        console.log("查询资源",resources.value);
+    })
 }
 
 const city = ref('');
@@ -84,16 +113,20 @@ const readExcel = (href) => {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     }).then(res => {
+        // resources.value = [];
         resources.value = res.data.map((item, index) => {
             item.index = index + 1;
+            item.content =  item.content.replace(/(?<!\n) /g, "\n");
             return item;
         })        
         loading.value = false;
+        console.log("初始资源",resources.value);
+        
     })
 };
 
 const getCurrentAnchor = () => {
-    readExcel(href.value);
+    // readExcel(href.value);
     return href.value;
 };
 
@@ -105,10 +138,8 @@ const cardPark = (item) => {
 
 onMounted(() => {
     city.value = route.query.city;
-    if(route.hash){
-        href.value = route.hash;
-    }
-    
+        href.value = '#景点'
+        readExcel(href.value);
 })
 </script>
 <style scoped>

@@ -25,12 +25,8 @@
             <span>
               <a @click="toDetail(record)">查看 一 {{ record.projectName }}</a>
               <a-divider type="vertical" />
-              <a>删除</a>
+              <a @click="deleteStrategy(record)">删除</a>
               <a-divider type="vertical" />
-              <a class="ant-dropdown-link">
-                更多
-                <down-outlined />
-              </a>
             </span>
           </template>
         </template>
@@ -99,7 +95,7 @@
 
 </template>
 <script setup>
-import { SmileOutlined, DownOutlined, InfoCircleOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons-vue';
+import { SmileOutlined, InfoCircleOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons-vue';
 import { ref, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { flattenedData } from '@/AreaDatas/flattenAddressData.js';
@@ -174,6 +170,16 @@ let TravingData = [];
 
 const data = ref([]);
 let position = ref([]);
+
+const deleteStrategy = (record) => {
+  api.post("/project/delete", { pid: record.pid },{headers:{'Content-Type': 'application/x-www-form-urlencoded'}}).then((res) => {
+    if(res.status === 200){
+      message.success("删除成功！");
+      searchAll();
+    }
+  });
+  
+};
 
 const tabClick = () => {
   console.log("activeKey",activeKey);

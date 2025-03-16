@@ -1,6 +1,6 @@
 <template>
   <a-layout style="min-height: calc(100vh - 64px)">
-    <a-layout-header class="header" :style="{ position: 'fixed', zIndex: 1, width: '100%' }">
+    <a-layout-header class="header" :style="{ position: 'fixed', zIndex:1000 /* 确保高于表格 */, width: '100%' }">
       <a-menu v-model:selectedKeys="selectedKeys1" theme="dark" mode="horizontal" :style="{ lineHeight: '64px' }">
         <a-menu-item key="0" disabled>
           <div class="logo">
@@ -18,16 +18,16 @@
       </a-menu>
       <!-- <div style="float: right; padding: 0 24px;text-align: center;font-size: large;">{{ user.username }}</div> -->
     </a-layout-header>
-    <a-layout-content style="padding: 0 50px;">
+    <a-layout-content style="padding: 0 0;">
       <a-breadcrumb style="margin: 16px 0">
         <a-breadcrumb-item>Home</a-breadcrumb-item>
         <a-breadcrumb-item>List</a-breadcrumb-item>
         <a-breadcrumb-item>App</a-breadcrumb-item>
         <a-breadcrumb-item></a-breadcrumb-item>
       </a-breadcrumb>
-      <a-layout style="padding: 24px 0; background: #fff">
+      <a-layout style="padding: 24px 0;">
         <a-layout-sider width="200"
-          style="position: fixed; top: 64px; left: 0; background: #fff; height: calc(100vh - 64px);">
+          style="position: fixed; top: 64px; left: 0; height: calc(100vh - 64px);">
           <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline" style="height: 100%">
             <!-- <div class = "avatar"> -->
             <img :src="user.avatarUrl" id="avatar" alt="用户头像">
@@ -41,7 +41,7 @@
                   用户中心
                 </span>
               </template>
-              <a-menu-item key="1" @click="toComment">个人资料</a-menu-item>
+              <a-menu-item key="1" @click="toPersonalCenter">个人资料</a-menu-item>
               <a-menu-item key="2">设置</a-menu-item>
               <a-menu-item key="3">帮助中心</a-menu-item>
               <a-menu-item key="4">世界你好</a-menu-item>
@@ -65,7 +65,7 @@
                   本站数据
                 </span>
               </template>
-              <a-menu-item key="9">网站用户活跃度统计</a-menu-item>
+              <a-menu-item key="9" @click="toLiveness">网站用户活跃度统计</a-menu-item>
               <a-menu-item key="10">打赏支持</a-menu-item>
               <a-menu-item key="11">留言板</a-menu-item>
               <!-- <a-menu-item key="12">option12</a-menu-item> -->
@@ -73,9 +73,9 @@
           </a-menu>
 
         </a-layout-sider>
-        <a-layout-content :style="{ padding: '0 24px', minHeight: '780px', marginLeft: '152px', marginTop: '16px' }">
+        <a-layout-content :style="{ padding: '0 24px', minHeight: '450px', marginLeft: '202px', marginTop: '16px' }">
           <div v-if="rou == null" id="allmap" />
-          <div v-else :style="{ padding: '24px', background: '#fff' }">
+          <div v-else :style="{ padding: '24px' }">
             <router-view />
           </div>
         </a-layout-content>
@@ -104,6 +104,11 @@ export default defineComponent({
     }
   },
   methods: {
+    toLiveness() {
+      this.rou = 'liveness'
+      this.$router.push({ name: `StrategyLiveness` });
+    },
+
     toLogin(){
       this.$router.push({name:`login`});
       localStorage.clear();
@@ -123,9 +128,9 @@ export default defineComponent({
 
       this.$router.push({ path: `/HomeMap/${this.user.id}` });
     },
-    toComment(){
-      this.rou = "comment"
-      this.$router.push({ name: `StrategyComment` }); 
+    toPersonalCenter(){
+      this.rou = "PersonalCenter"
+      this.$router.push({ name: `PersonalCenter` }); 
     },
     toMap() {
       this.rou = 'Map'
@@ -201,7 +206,9 @@ export default defineComponent({
   watch: {
     // 监听$route对象的变化
     '$route': function (newRoute) {
-      console.log("新路由", newRoute);
+      localStorage.setItem("newRoute", JSON.stringify(newRoute));
+      console.log("newRoute", newRoute);
+      
 
       // 如果路由发生变化，重新加载地图
       if (newRoute.path === `/HomeMap/${localStorage.getItem('userId')}`) {
@@ -272,5 +279,17 @@ export default defineComponent({
 .ant-menu {
   background-color: rgba(0, 0, 0, 0.7);
   color: #fff;
+}
+.ant-layout{
+  background-image: url('https://ts1.tc.mm.bing.net/th/id/R-C.8dbf8e136e7d71653b63fdbd4d17fb6c?rik=KEcgD1%2fwKEKc9A&riu=http%3a%2f%2fimg.xintp.com%2f2019%2f12%2f10%2fxl5gp5kgesw.jpg&ehk=j5IVfJ0NDf2S9Ki9dJ7uXRMGlqubf9rR8TGsNLZP%2fMQ%3d&risl=&pid=ImgRaw&r=0');
+  background-size: cover;
+  background-position: center;
+  background-repeat:no-repeat;
+}
+
+
+.ant-layout-footer {
+  background: none !important; /* 去掉页尾背景 */
+  color: white; /* 根据背景图片调整字体颜色 */
 }
 </style>

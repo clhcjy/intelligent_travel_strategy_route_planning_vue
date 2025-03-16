@@ -249,15 +249,19 @@ const isupdate = ref(false);
 // const htmls = ref([]);
 
 const navicat = ref([
-  { vehicle: '驾车', icon: "http://192.168.108.231:8082/car.png" },
-  { vehicle: '公交', icon: 'http://192.168.108.231:8082/Bus.png' },
-  { vehicle: '骑行', icon: 'http://192.168.108.231:8082/RIDE.png' },
-  { vehicle: '步行', icon: 'http://192.168.108.231:8082/walk.png' }
+  { vehicle: '驾车', icon: "http://192.168.94.231:8082/car.png" },
+  { vehicle: '公交', icon: 'http://192.168.94.231:8082/Bus.png' },
+  { vehicle: '骑行', icon: 'http://192.168.94.231:8082/RIDE.png' },
+  { vehicle: '步行', icon: 'http://192.168.94.231:8082/walk.png' }
 ])
 let id = 0;
 let value = ref('');
 let markers = []; // 用于存储所有标记的数组
 let labels = [];
+// 定义路径规划对象
+let driving = null;
+let bus = null;
+let walking = null
 let map = null;
 let BMapGL = window.BMapGL;
 
@@ -416,7 +420,19 @@ const addProject = () => {
 //   }
 // };
 
+const clearRoutes = () => {
+  // 清除驾车路线
+  if (driving) driving.clearResults();
+  // 清除公交路线
+  if (bus) bus.clearResults();
+  // 清除步行路线
+  if (walking) walking.clearResults();
+};
+
 const vehicle = (category) => {
+  clearRoutes(); // 在每次路径规划前清除之前的规划结果
+
+
   let aList = StartingPoint();
   let bList = EndingPoint();
   if (aList.length === 0) { message.error("请选择起点"); return }
@@ -450,14 +466,14 @@ const vehicle = (category) => {
       var p2 = new BMapGL.Point(end.lng, end.lat);
       if (category === "驾车") {
         // 驾车规划
-        var driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+        driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
         driving.search(p1, p2);
       } else if (category === "公交") {
         // 公交规划
-        var bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true }, });
+        bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true }, });
         bus.search(p1, p2);
       } else if (category === "步行") {
-        var walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+        walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
         walking.search(p1, p2);
       } else {
         walking.clearResults();
@@ -925,6 +941,12 @@ onMounted(() => {
   pid.value = route.query.pid;
   projectName.value = route.query.projectName;
   picture.value = route.query.picture;
+
+    // 初始化路径规划对象
+    driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+  bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true } });
+  walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+
 });
 </script>
 
