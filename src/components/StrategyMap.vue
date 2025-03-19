@@ -163,7 +163,7 @@
             <a-card v-for="(item, index) in recommendation" :key="index" style="width: 100px;margin: 10px;">
               <template #cover>
                 <img alt="example"
-                  :src="'http://192.168.94.231:8082/' + item.link" />
+                  :src="'http://localhost:8082/' + item.link" />
               </template>
               <a-card-meta :title="item.title">
                 <template #description>
@@ -249,10 +249,10 @@ const isupdate = ref(false);
 // const htmls = ref([]);
 
 const navicat = ref([
-  { vehicle: '驾车', icon: "http://192.168.94.231:8082/car.png" },
-  { vehicle: '公交', icon: 'http://192.168.94.231:8082/Bus.png' },
-  { vehicle: '骑行', icon: 'http://192.168.94.231:8082/RIDE.png' },
-  { vehicle: '步行', icon: 'http://192.168.94.231:8082/walk.png' }
+  { vehicle: '驾车', icon: "http://localhost:8082/car.png" },
+  { vehicle: '公交', icon: 'http://localhost:8082/Bus.png' },
+  { vehicle: '骑行', icon: 'http://localhost:8082/RIDE.png' },
+  { vehicle: '步行', icon: 'http://localhost:8082/walk.png' }
 ])
 let id = 0;
 let value = ref('');

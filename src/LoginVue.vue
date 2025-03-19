@@ -96,7 +96,7 @@ export default {
       headers: {
         Authorization: 'Bearer your-token-here', // 如果需要的话
       },
-      uploadUrl: 'http://192.168.94.231:8081/upload/User',
+      uploadUrl: 'http://localhost:8081/upload/User',
       loginForm: {
         username: '',
         password: '',
