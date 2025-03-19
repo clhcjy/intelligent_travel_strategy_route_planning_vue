@@ -19,14 +19,14 @@
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">姓名：</p>
-                                <a-input :bordered="false" style="width: 70%" v-model:value="user.username"
-                                    disabled="true" placeholder="Basic usage" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="user.username" disabled="true"
+                                    placeholder="Basic usage" />
                             </div>
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">自我介绍：</p>
-                                <a-input :bordered="false" style="width: 70%" v-model:value="user.username"
-                                    disabled="true" placeholder="Basic usage" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.self_introduction"
+                                    disabled="true" placeholder="自我介绍" />
                             </div>
 
                         </a-col>
@@ -34,14 +34,14 @@
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">手机号：</p>
-                                <a-input :bordered="false" style="width: 70%" v-model:value="value" disabled="true"
-                                    placeholder="236436436734" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.cell_phone_number"
+                                    disabled="true" placeholder="手机号" />
                             </div>
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">邮箱：</p>
-                                <a-input :bordered="false" style="width: 70%" v-model:value="value" disabled="true"
-                                    placeholder="3463474745858@qq.com" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.email" disabled="true"
+                                    placeholder="邮箱" />
                             </div>
 
                         </a-col>
@@ -54,14 +54,14 @@
                         <a-col :span="8">
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">主题：</p>
-                                <a-input :bordered="false" style="width: 70%" value="默认" disabled="true"
-                                    placeholder="Basic usage" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.theme" disabled="true"
+                                    placeholder="主题" />
                             </div>
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">语言：</p>
-                                <a-input :bordered="false" style="width: 70%" value="中文" disabled="true"
-                                    placeholder="Basic usage" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.language"
+                                    disabled="true" placeholder="语言" />
                             </div>
 
                         </a-col>
@@ -69,14 +69,14 @@
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">隐私设置：</p>
-                                <a-input :bordered="false" style="width: 70%" value="公开" disabled="true"
-                                    placeholder="Basic usage" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.privacy_settings"
+                                    disabled="true" placeholder="隐私设置" />
                             </div>
 
                             <div style="display: flex;margin-top: 20px;align-items: center;">
                                 <p style="align-items: center;margin: 5px 0 5px 0 !important;">访客记录：</p>
-                                <a-input :bordered="false" style="width: 70%" value="无" disabled="true"
-                                    placeholder="Basic usage" />
+                                <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.visitor_record"
+                                    disabled="true" placeholder="访客记录" />
                             </div>
                         </a-col>
                     </a-row>
@@ -113,8 +113,8 @@
         </a-collapse-panel>
     </a-collapse>
 
-    <a-modal v-model:open="open" width="80%" :title="SelectKey.header" :confirm-loading="confirmLoading" @ok="handleOk" okText="确认"
-        cancelText="取消" @cancel="handleCancel">
+    <a-modal v-model:open="open" width="80%" :title="SelectKey.header" :confirm-loading="confirmLoading" @ok="handleOk()"
+        okText="确认" cancelText="取消" @cancel="handleCancel">
         <div v-if="SelectKey.key == '1'">
             <div style="margin-bottom: 24px;width: 100%;padding: 0 10% 0 10%;">
                 <a-row>
@@ -134,7 +134,7 @@
 
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">自我介绍：</p>
-                            <a-input :bordered="false" style="width: 70%" v-model:value="user.username"
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.self_introduction"
                                 placeholder="Basic usage" />
                         </div>
 
@@ -143,13 +143,13 @@
 
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">手机号：</p>
-                            <a-input :bordered="false" style="width: 70%" v-model:value="value"
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.cell_phone_number"
                                 placeholder="236436436734" />
                         </div>
 
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">邮箱：</p>
-                            <a-input :bordered="false" style="width: 70%" v-model:value="value"
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.email"
                                 placeholder="3463474745858@qq.com" />
                         </div>
 
@@ -163,12 +163,14 @@
                     <a-col :span="8">
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">主题：</p>
-                            <a-input :bordered="false" style="width: 70%" value="默认" placeholder="Basic usage" />
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.theme"
+                                placeholder="Basic usage" />
                         </div>
 
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">语言：</p>
-                            <a-input :bordered="false" style="width: 70%" value="中文" placeholder="Basic usage" />
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.privacy_settings"
+                                placeholder="Basic usage" />
                         </div>
 
                     </a-col>
@@ -176,12 +178,14 @@
 
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">隐私设置：</p>
-                            <a-input :bordered="false" style="width: 70%" value="公开" placeholder="Basic usage" />
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.privacy_settings"
+                                placeholder="Basic usage" />
                         </div>
 
                         <div style="display: flex;margin-top: 20px;align-items: center;">
                             <p style="align-items: center;margin: 5px 0 5px 0 !important;">访客记录：</p>
-                            <a-input :bordered="false" style="width: 70%" value="无" placeholder="Basic usage" />
+                            <a-input :bordered="false" style="width: 70%" v-model:value="userInfo.visitor_record"
+                                placeholder="Basic usage" />
                         </div>
                     </a-col>
                 </a-row>
@@ -212,14 +216,13 @@
             </div>
         </div>
     </a-modal>
-
-
 </template>
 <script setup>
 import { onMounted, ref } from 'vue';
 import { SettingOutlined } from '@ant-design/icons-vue';
 import { CaretRightOutlined } from '@ant-design/icons-vue';
 import api from '../api/request.js';
+import { message } from 'ant-design-vue';
 const activeKey = ref(['1']);
 const ok = ref(1);
 // const text = `A dog is a type of domesticated animal.Known for its loyalty and faithfulness,it can be found as a welcome guest in many households across the world.`;
@@ -230,6 +233,8 @@ const user = ref({});
 
 const SelectKey = ref({});
 
+const userInfo = ref({});
+
 const panels = ref([
     { key: '1', header: '个人信息' },
     { key: '2', header: '个性化设置' },
@@ -237,18 +242,34 @@ const panels = ref([
     { key: '4', header: '互动与反馈' }
 ]);
 
-const modalText = ref('Content of the modal');
 const open = ref(false);
 const confirmLoading = ref(false);
 
 const handleOk = () => {
-    modalText.value = 'The modal will be closed after two seconds';
-    confirmLoading.value = true;
-    setTimeout(() => {
-        open.value = false;
-        confirmLoading.value = false;
-    }, 2000);
-    ok.value = 1;
+    api.post("/userInfo/updateUserInfo", {
+        user_id: user.value.id,
+        cell_phone_number: userInfo.value.cell_phone_number,
+        email: userInfo.value.email,
+        language: userInfo.value.language,
+        theme: userInfo.value.theme,
+        self_introduction: userInfo.value.self_introduction,
+        privacy_settings: userInfo.value.privacy_settings,
+        visitor_record: userInfo.value.visitor_record,
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => {
+        if (res.data == 'success') {
+            confirmLoading.value = true;
+            message.success("修改个人信息成功", 3);
+            setTimeout(() => {
+                open.value = false;
+                confirmLoading.value = false;
+            }, 2000);
+            ok.value = 1;
+        }
+    });
 };
 
 const handleCancel = () => {
@@ -276,6 +297,15 @@ const avatarProps = (url) => {
 onMounted(() => {
     api.get(`/findByIdRest/${localStorage.getItem('userId')}`).then((res) => {
         user.value = res.data;
+        api.post("/userInfo/getUserInfoByUserId", {
+            userId: user.value.id
+        }, {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        }).then((res) => {
+            userInfo.value = res.data;
+        });
     });
 })
 </script>
