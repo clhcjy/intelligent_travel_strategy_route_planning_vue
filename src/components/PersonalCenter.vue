@@ -1,12 +1,12 @@
 <template>
-    <a-collapse v-model:activeKey="activeKey" :bordered="false" accordion expandIconPosition="end"
-        style="background: rgb(255, 255, 255)">
+    <a-collapse :style="antLayoutStyle" v-model:activeKey="activeKey" :bordered="false" accordion expandIconPosition="end" :ghost="true"
+        >
         <template #expandIcon="{ isActive }">
             <caret-right-outlined :rotate="isActive ? 90 : 0" />
         </template>
         <a-collapse-panel v-for="(item) in panels" :key="item.key" :header="item.header" :style="customStyle"
-            :collapsible="ok == 1 ? 'none' : 'disabled'">
-            <div v-if="item.key == '1'">
+            :collapsible="ok == 1 ? 'none' : 'disabled'" style="border-bottom: 2px solid rgb(0, 0, 0, 0.2);">
+            <div class="card-content" v-if="item.key == '1'">
                 <div style="margin-bottom: 24px;width: 100%;">
                     <a-row>
                         <a-col :span="8">
@@ -48,7 +48,7 @@
                     </a-row>
                 </div>
             </div>
-            <div v-if="item.key == '2'">
+            <div class="card-content" v-if="item.key == '2'">
                 <div style="margin-bottom: 24px;width: 100%;">
                     <a-row>
                         <a-col :span="8">
@@ -82,7 +82,7 @@
                     </a-row>
                 </div>
             </div>
-            <div v-if="item.key == '3'">
+            <div class="card-content" v-if="item.key == '3'">
                 <div style="margin-bottom: 24px;width: 100%;">
                     <a-row>
                         <a-col :span="8">
@@ -217,18 +217,33 @@
         </div>
     </a-modal>
 </template>
+<style>
+    .card-content{
+        background-color: transparent !important;
+    }
+</style>
 <script setup>
 import { onMounted, ref } from 'vue';
 import { SettingOutlined } from '@ant-design/icons-vue';
 import { CaretRightOutlined } from '@ant-design/icons-vue';
 import api from '../api/request.js';
 import { message } from 'ant-design-vue';
+import { computed } from 'vue';
+
+const backgroundUrl = 'https://ts1.tc.mm.bing.net/th/id/R-C.8dbf8e136e7d71653b63fdbd4d17fb6c?rik=KEcgD1%2fwKEKc9A&riu=http%3a%2f%2fimg.xintp.com%2f2019%2f12%2f10%2fxl5gp5kgesw.jpg&ehk=j5IVfJ0NDf2S9Ki9dJ7uXRMGlqubf9rR8TGsNLZP%2fMQ%3d&risl=&pid=ImgRaw&r=0'; // 替换为你的图片 URL
+
+const antLayoutStyle = computed(() => ({
+  minHeight: '100vh',
+  background: `url(${backgroundUrl}) no-repeat center center fixed`,
+  backgroundSize: 'cover',
+}));
+
 const activeKey = ref(['1']);
 const ok = ref(1);
 // const text = `A dog is a type of domesticated animal.Known for its loyalty and faithfulness,it can be found as a welcome guest in many households across the world.`;
 const customStyle =
-    'background: #f7f7f7;border-radius: 4px;margin-bottom: 24px;border: 0;overflow: hidden';
-
+    'border-radius: 4px;margin-bottom: 24px;border: 0;overflow: hidden';
+    // background: #f7f7f7;
 const user = ref({});
 
 const SelectKey = ref({});

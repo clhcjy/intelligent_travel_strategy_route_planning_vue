@@ -1,5 +1,5 @@
 <template>
-  <a-layout style="min-height: calc(100vh - 64px)">
+  <a-layout :style="antLayoutStyle">
     <a-layout-header class="header" :style="{ position: 'fixed', zIndex:1000 /* 确保高于表格 */, width: '100%' }">
       <a-menu v-model:selectedKeys="selectedKeys1" theme="dark" mode="horizontal" :style="{ lineHeight: '64px' }">
         <a-menu-item key="0" disabled>
@@ -18,17 +18,17 @@
       </a-menu>
       <!-- <div style="float: right; padding: 0 24px;text-align: center;font-size: large;">{{ user.username }}</div> -->
     </a-layout-header>
-    <a-layout-content style="padding: 0 0;">
+    <a-layout-content :style="antLayoutStyle">
       <a-breadcrumb style="margin: 16px 0">
         <a-breadcrumb-item>Home</a-breadcrumb-item>
         <a-breadcrumb-item>List</a-breadcrumb-item>
         <a-breadcrumb-item>App</a-breadcrumb-item>
         <a-breadcrumb-item></a-breadcrumb-item>
       </a-breadcrumb>
-      <a-layout style="padding: 24px 0;">
+      <a-layout :style="antLayoutStyle">
         <a-layout-sider width="200"
           style="position: fixed; top: 64px; left: 0; height: calc(100vh - 64px);">
-          <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline" style="height: 100%">
+          <a-menu v-model:selectedKeys="selectedKeys2" v-model:openKeys="openKeys" mode="inline" style="height: 100vh;overflow: auto;">
             <!-- <div class = "avatar"> -->
             <img :src="user.avatarUrl" id="avatar" alt="用户头像">
             <div style="display: flex;justify-content: center;padding:30px 30px;font-size: 30px;">{{ user.username }}
@@ -73,8 +73,8 @@
           </a-menu>
 
         </a-layout-sider>
-        <a-layout-content :style="{ padding: '0 24px', minHeight: '450px', marginLeft: '202px', marginTop: '16px' }">
-          <div v-if="rou == null" id="allmap" />
+        <a-layout-content :style="{ padding: '20px 24px', minHeight: '450px', marginLeft: '202px', marginTop: '16px' }">
+          <div v-if="rou == null" id="allmap" style="border-radius: 20px;"/>
           <div v-else :style="{ padding: '24px' }">
             <router-view />
           </div>
@@ -103,7 +103,21 @@ export default defineComponent({
       menu: 'HomeMap', // 默认显示的组件
     }
   },
+  computed: {
+    antLayoutStyle() {
+      const backgroundUrl = 'https://ts1.tc.mm.bing.net/th/id/R-C.8dbf8e136e7d71653b63fdbd4d17fb6c?rik=KEcgD1%2fwKEKc9A&riu=http%3a%2f%2fimg.xintp.com%2f2019%2f12%2f10%2fxl5gp5kgesw.jpg&ehk=j5IVfJ0NDf2S9Ki9dJ7uXRMGlqubf9rR8TGsNLZP%2fMQ%3d&risl=&pid=ImgRaw&r=0';
+      return {
+        minHeight: '40vh',
+        background: `url(${backgroundUrl}) no-repeat center center fixed`,
+        backgroundSize: "cover",
+        backgroundPosition: `center`,
+        backgroundRepeat: `no-repeat`,
+      };
+    },
+  },
   methods: {
+   
+
     toLiveness() {
       this.rou = 'liveness'
       this.$router.push({ name: `StrategyLiveness` });
@@ -241,7 +255,7 @@ export default defineComponent({
 }
 
 .site-layout-background {
-  background: #fff;
+  background: none !important; /* 去掉页尾背景 */
 }
 
 #allmap {
@@ -277,15 +291,10 @@ export default defineComponent({
 }
 
 .ant-menu {
-  background-color: rgba(0, 0, 0, 0.7);
+  background: none !important; /* 去掉页尾背景 */
   color: #fff;
 }
-.ant-layout{
-  background-image: url('https://ts1.tc.mm.bing.net/th/id/R-C.8dbf8e136e7d71653b63fdbd4d17fb6c?rik=KEcgD1%2fwKEKc9A&riu=http%3a%2f%2fimg.xintp.com%2f2019%2f12%2f10%2fxl5gp5kgesw.jpg&ehk=j5IVfJ0NDf2S9Ki9dJ7uXRMGlqubf9rR8TGsNLZP%2fMQ%3d&risl=&pid=ImgRaw&r=0');
-  background-size: cover;
-  background-position: center;
-  background-repeat:no-repeat;
-}
+
 
 
 .ant-layout-footer {

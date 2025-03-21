@@ -336,5 +336,9 @@ onMounted(() => {
   align-items: center;
 }
 
+.ant-table{
+  background-color: transparent;
+}
+
 /* Add this CSS to your component's style section */
 </style>

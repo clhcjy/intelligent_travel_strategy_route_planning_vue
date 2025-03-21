@@ -29,8 +29,8 @@
             <a-card-meta :title="item.projectName" class="ellipsis">
             </a-card-meta>
         </a-card>
-        <div style="width: 200px;margin: 20px;height: 250px;">
-            <button style="margin: 50% 25%;" @click="addproject">添加项目</button>
+        <div style="width: 200px;margin: 20px;height: auto;display: flex;justify-content: center;align-items: center;">
+            <button type="link" style="font-size: 100px;border-radius: 30px;padding-bottom:15px;background-color: transparent;" @click="addproject">+</button>
         </div>
     </div>
 </template>
