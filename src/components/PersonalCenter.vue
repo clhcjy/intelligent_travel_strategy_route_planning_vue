@@ -230,7 +230,7 @@ import api from '../api/request.js';
 import { message } from 'ant-design-vue';
 import { computed } from 'vue';
 
-const backgroundUrl = 'https://ts1.tc.mm.bing.net/th/id/R-C.8dbf8e136e7d71653b63fdbd4d17fb6c?rik=KEcgD1%2fwKEKc9A&riu=http%3a%2f%2fimg.xintp.com%2f2019%2f12%2f10%2fxl5gp5kgesw.jpg&ehk=j5IVfJ0NDf2S9Ki9dJ7uXRMGlqubf9rR8TGsNLZP%2fMQ%3d&risl=&pid=ImgRaw&r=0'; // 替换为你的图片 URL
+const backgroundUrl = 'https://file.moyublog.com/d/file/2020-11-17/1686e69048d6f3a51d8fc85fdac16074.jpg'; // 替换为你的图片 URL
 
 const antLayoutStyle = computed(() => ({
   minHeight: '100vh',

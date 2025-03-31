@@ -261,7 +261,8 @@ let labels = [];
 // 定义路径规划对象
 let driving = null;
 let bus = null;
-let walking = null
+let walking = null;
+let riding = null;
 let map = null;
 let BMapGL = window.BMapGL;
 
@@ -427,6 +428,8 @@ const clearRoutes = () => {
   if (bus) bus.clearResults();
   // 清除步行路线
   if (walking) walking.clearResults();
+  // 清除骑行路线
+  if (riding) riding.clearResults();
 };
 
 const vehicle = (category) => {
@@ -468,15 +471,23 @@ const vehicle = (category) => {
         // 驾车规划
         driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
         driving.search(p1, p2);
+        console.log("驾车规划");
       } else if (category === "公交") {
         // 公交规划
         bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true }, });
         bus.search(p1, p2);
+        console.log("公交规划");
       } else if (category === "步行") {
         walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
         walking.search(p1, p2);
-      } else {
-        walking.clearResults();
+        console.log("步行规划");
+      } else if(category === "骑行"){
+        riding = new BMapGL.RidingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+        riding.search(p1, p2);
+        console.log("骑行规划");
+      }
+      else {
+        clearRoutes();
       }
     }
   }
