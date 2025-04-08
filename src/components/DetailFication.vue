@@ -187,7 +187,7 @@ onMounted(() => {
     border: black;
     background-color: rgb(255, 255, 255);
     box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.2);
-    border-radius: 5%;
+    border-radius: 5px;
 }
 
 .detail-fication-title {

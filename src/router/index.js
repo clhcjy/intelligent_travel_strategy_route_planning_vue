@@ -55,7 +55,7 @@ const routes = [
       {
         path: '/DetailFication',
         name: 'DetailFication',
-        component: () => import('@/components/DetailFication.vue'),
+        component: () => import('@/components/CsVue.vue'),
       },
       {
         path: '/PersonalCenter',

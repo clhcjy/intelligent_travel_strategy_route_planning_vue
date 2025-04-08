@@ -1,6 +1,6 @@
 <template>
     <div></div>
-    <a-page-header style="border: 1px solid rgb(235, 237, 240)" :title="'资源'"
+    <a-page-header style="border-bottom: 1px solid transparent" :title="'资源'"
         @back= goBack()>
         <template #extra>
             <a-input placeholder="搜索" v-model:value="searchText" @pressEnter="callPythonScript()" />

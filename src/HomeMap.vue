@@ -73,7 +73,7 @@
           </a-menu>
 
         </a-layout-sider>
-        <a-layout-content :style="{ padding: '20px 24px', minHeight: '450px', marginLeft: '202px', marginTop: '16px' }">
+        <a-layout-content :style="{ padding: '20px 24px', minHeight: '100vh', marginLeft: '202px', marginTop: '16px' }">
           <div v-if="rou == null" id="allmap" style="border-radius: 20px;"/>
           <div v-else :style="{ padding: '24px' }">
             <router-view />
