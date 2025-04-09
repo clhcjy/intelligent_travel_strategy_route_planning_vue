@@ -190,15 +190,33 @@
         <a-button key="submit" type="primary" :loading="loadingAdd" @click="handleOkAdd">提交</a-button>
       </template>
 
-      <a-textarea placeholder="攻略内容，可直接粘贴，需要换行的地方记得回车~"></a-textarea>
+
+      <!-- 标题 -->
+      <a-form-item label="标题" name="标题" :rules="[{ required: true, message: '请填写标题！' }]">
+        <a-input style="width: 100%" v-model:value="RaiderData.title" />
+      </a-form-item>
+
+      <!-- 分类 -->
+      <a-form-item label="分类" name="分类" :rules="[{ required: true, message: '请选择分类！' }]">
+        <a-select ref="select" v-model:value="RaiderData.classification" style="width: 100%">
+          <a-select-option v-for="(item, index) in optionsAdd" :key="index" :value="item.value">
+            {{ item.label }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <!-- 内容 -->
+      <a-form-item label="攻略内容" name="攻略内容" :rules="[{ required: true, message: '请填写攻略内容！' }]">
+        <a-textarea placeholder="攻略内容，可直接粘贴，需要换行的地方记得回车~" v-model:value="RaiderData.content" />
+      </a-form-item>
+
 
       <!-- 上传图片部分 -->
-      <a-upload v-model:file-list="fileList1" action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-        list-type="picture" class="upload-list-inline">
-        <a-button>
+      <a-upload style="width:100%;display: flex;" v-model:file-list="fileList1"
+        action="https://www.mocky.io/v2/5cc8019d300000980a055e76" list-type="picture" class="upload-list-inline">
+        <PlusSquareOutlined width:100px;height: 100px;>
           <upload-outlined></upload-outlined>
-          上传图片
-        </a-button>
+        </PlusSquareOutlined>
       </a-upload>
     </a-modal>
 
@@ -207,12 +225,18 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined } from '@ant-design/icons-vue';
+import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined,PlusSquareOutlined } from '@ant-design/icons-vue';
 import api from '@/api/request.js';
 import { message } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
-// import MapVgl from '@mapvgl/mapvgl';
+// import MapVgl from '@mapvgl/mapvgl'; 
+const RaiderData = ref({
+  title: '',
+  content: '',
+  link: '',
+  classification: '#美食'
+});
 
 const container = ref(null);
 
@@ -237,9 +261,37 @@ const fileList1 = ref([
   },
 ]);
 
+const optionsAdd = ref([
+  {
+    label: '景点',
+    value: '#景点'
+  },
+  {
+    label: '美食',
+    value: '#美食'
+  },
+  {
+    label: '活动',
+    value: '#活动'
+  },
+  {
+    label: '酒店',
+    value: '#酒店'
+  },
+  {
+    label: '车票',
+    value: '#车票'
+  },
+  {
+    label: '娱乐',
+    value: '#娱乐'
+  }
+])
+
 const showModalAdd = () => {
   openAdd.value = true;
   DetailPoint.value = false;
+  console.log("openAdd.value", openAdd.value)
 };
 
 const handleOkAdd = () => {
