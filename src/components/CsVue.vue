@@ -8,19 +8,9 @@
             </a-carousel>
         </div>
         <div class="rightContent">
-            <div>
-                <div v-for="(item, index) in parsedContent" :key="index">
-                    <h1 v-if="item.type === 'title'">{{ item.content }}</h1>
-                    <h2 v-else-if="item.type === 'day'">{{ item.content }}</h2>
-                    <ul v-else-if="item.type === 'list'">
-                        <li v-for="(listItem, listIndex) in item.content" :key="listIndex">
-                            {{ listItem }}
-                        </li>
-                    </ul>
-                    <p v-else-if="item.type === 'description'">{{ item.content }}</p>
-                    <p v-else>{{ item.content }}</p>
+                <div style="" v-for="(cx, index) in item.content" :key="index">
+                    {{ cx }}
                 </div>
-            </div>
         </div>
     </div>
     <div class="footer">
@@ -66,39 +56,7 @@ const data = ref([]);
 
 const parseTravelText = () => {
     const lines = item.value.content.split("\n");
-    const parsedContent = [];
-
-    lines.forEach((line) => {
-        if (line.includes("🌈")) {
-            // 标题
-            parsedContent.push({
-                type: "title",
-                content: line.replace("🌈", "").trim()
-            });
-        } else if (line.includes("Day")) {
-            // 每天的行程
-            parsedContent.push({
-                type: "day",
-                content: line.trim()
-            });
-            const nextLine = lines[lines.indexOf(line) + 1];
-            if (nextLine) {
-                const items = nextLine.split("——").map(item => item.trim());
-                parsedContent.push({
-                    type: "list",
-                    content: items
-                });
-            }
-        } else if (line.includes("✅")) {
-            // 其他说明
-            parsedContent.push({
-                type: "description",
-                content: line.trim()
-            });
-        }
-    });
-
-    return parsedContent;
+    return lines;
 }
 
 // const comment = ref("");
@@ -200,7 +158,20 @@ onMounted(() => {
 .rightContent {
     width: 50%;
     height: 100%;
-
+    padding-left: 5%;
+    max-height: 300px;
+    overflow-y:auto;
+    font-size: large;
+}
+.rightContent::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 17px; /* 滚动条的宽度 */
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1)); /* 渐变背景，覆盖滚动条 */
+  pointer-events: none; /* 防止鼠标事件被伪元素拦截 */
 }
 
 /* For demo */

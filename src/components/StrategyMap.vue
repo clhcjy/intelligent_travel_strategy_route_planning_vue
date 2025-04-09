@@ -20,8 +20,7 @@
   <div
     style="position: absolute; top: 10px; right: 10px;width:30%;height: 20vh; z-index: 9999;display: flex;background-color: rgba(255, 255, 255, 0.8);border: #000000;">
     <div style="width: 50%;height: 100%;">
-      <img :src="picture"
-        style="width:90%;height:90%;opacity: 0.5;margin-left: 5%;object-fit: cover;border-radius: 10%;">
+      <img :src="picture" style="width:90%;height:90%;opacity: 0.5;margin-left: 5%;object-fit: cover;border-radius: 10%;">
     </div>
     <div style="width: 50%;height: 100%;display:flex;justify-content: center;align-items: center;text-align: center">
       {{ projectName }}
@@ -77,8 +76,7 @@
     <a-popover v-model:open="visible" trigger="click">
       <template #content>
         <div style="display: flex; justify-content: space-around; background-color: rgba(255, 255, 255, 0.8);">
-          <a-card hoverable style="width: 10%;" v-for="item in MapPicture" :key="item.label"
-            @click="ToSetMapType(item)">
+          <a-card hoverable style="width: 10%;" v-for="item in MapPicture" :key="item.label" @click="ToSetMapType(item)">
             <template #cover>
               <img alt="example" :src="item.src" style="width: 100%;height: 100%;" />
             </template>
@@ -123,8 +121,8 @@
     style="position: absolute; top: 30vh; left: 10px; width: 40%; height: 50vh; z-index: 9999; display: flex;align-items: center;justify-content: space-around; background-color: transparent;border: #000000;overflow-y: auto;"
     v-show="DetailPoint">
     <a-drawer v-model:open="DetailPoint" class="custom-class" root-class-name="root-class-name"
-      :root-style="{ color: 'blue' }" style="color: red;" :title="pointDetail.title" :get-container="false"
-      :mask="false" placement="left">
+      :root-style="{ color: 'blue' }" style="color: red;" :title="pointDetail.title" :get-container="false" :mask="false"
+      placement="left">
       <div class="info-window">
         <p class="address">地址：{{ pointDetail.address }}</p>
         <p>省份：{{ pointDetail.province }}</p>
@@ -158,12 +156,15 @@
       </div>
       <div class="info-window">
         <div style="text-align: center;color: #000000;">
-          <h4>必看推荐</h4>
+          <div style="display: flex;justify-content: space-around;align-items: center;">
+            <a @click="showModalAdd">写攻略</a>
+            <h4>必看推荐</h4>
+          </div>
+
           <div style="width:300px;display: flex;flex-wrap: wrap;">
             <a-card v-for="(item, index) in recommendation" :key="index" style="width: 100px;margin: 10px;">
               <template #cover>
-                <img alt="example"
-                  :src="'http://localhost:8082/' + item.link" />
+                <img alt="example" :src="'http://localhost:8082/' + item.link" />
               </template>
               <a-card-meta :title="item.title">
                 <template #description>
@@ -181,6 +182,26 @@
       </div>
     </a-drawer>
 
+
+    <!-- 写攻略弹窗 -->
+    <a-modal :mask="false" v-model:open="openAdd" title="写攻略" @ok="handleOkAdd">
+      <template #footer>
+        <a-button key="back" @click="handleCancelAdd">返回</a-button>
+        <a-button key="submit" type="primary" :loading="loadingAdd" @click="handleOkAdd">提交</a-button>
+      </template>
+
+      <a-textarea placeholder="攻略内容，可直接粘贴，需要换行的地方记得回车~"></a-textarea>
+
+      <!-- 上传图片部分 -->
+      <a-upload v-model:file-list="fileList1" action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        list-type="picture" class="upload-list-inline">
+        <a-button>
+          <upload-outlined></upload-outlined>
+          上传图片
+        </a-button>
+      </a-upload>
+    </a-modal>
+
   </div>
 </template>
 
@@ -194,6 +215,46 @@ import { useRouter } from 'vue-router';
 // import MapVgl from '@mapvgl/mapvgl';
 
 const container = ref(null);
+
+const loadingAdd = ref(false);
+
+const openAdd = ref(false);
+
+const fileList1 = ref([
+  {
+    uid: '-1',
+    name: 'xxx.png',
+    status: 'done',
+    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+  },
+  {
+    uid: '-2',
+    name: 'yyy.png',
+    status: 'done',
+    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+  },
+]);
+
+const showModalAdd = () => {
+  openAdd.value = true;
+  DetailPoint.value = false;
+};
+
+const handleOkAdd = () => {
+  loadingAdd.value = true;
+  setTimeout(() => {
+    loadingAdd.value = false;
+    openAdd.value = false;
+    DetailPoint.value = true;
+  }, 2000);
+};
+
+const handleCancelAdd = () => {
+  openAdd.value = false;
+  DetailPoint.value = true;
+};
 
 const MapPicture = ref([
   { label: "原版", src: "http://mapopen-file-upload.bj.bcebos.com/custom/png/9a634f19df335953774e3854c1c0db11_1733970652.png?1733970662474&quot" },
@@ -481,7 +542,7 @@ const vehicle = (category) => {
         walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
         walking.search(p1, p2);
         console.log("步行规划");
-      } else if(category === "骑行"){
+      } else if (category === "骑行") {
         riding = new BMapGL.RidingRoute(map, { renderOptions: { map: map, autoViewport: true } });
         riding.search(p1, p2);
         console.log("骑行规划");
@@ -953,8 +1014,8 @@ onMounted(() => {
   projectName.value = route.query.projectName;
   picture.value = route.query.picture;
 
-    // 初始化路径规划对象
-    driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+  // 初始化路径规划对象
+  driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
   bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true } });
   walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
 
@@ -1006,5 +1067,19 @@ onMounted(() => {
 
 .info-window .address {
   font-weight: bold;
+}
+
+.ant-modal-content {
+  height: 80vh !important;
+}
+
+.upload-list-inline :deep(.ant-upload-list-item) {
+  float: left;
+  width: 200px;
+  margin-right: 8px;
+}
+
+.upload-list-inline [class*='-upload-list-rtl'] :deep(.ant-upload-list-item) {
+  float: right;
 }
 </style>
