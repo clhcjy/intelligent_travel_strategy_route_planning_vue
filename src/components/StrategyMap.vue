@@ -184,7 +184,7 @@
 
 
     <!-- 写攻略弹窗 -->
-    <a-modal :mask="false" v-model:open="openAdd" title="写攻略" @ok="handleOkAdd">
+    <a-modal :maskClosable="false" :mask="false" v-model:open="openAdd" title="写攻略" @ok="handleOkAdd">
       <template #footer>
         <a-button key="back" @click="handleCancelAdd">返回</a-button>
         <a-button key="submit" type="primary" :loading="loadingAdd" @click="handleOkAdd">提交</a-button>
@@ -192,12 +192,12 @@
 
 
       <!-- 标题 -->
-      <a-form-item label="标题" name="标题" :rules="[{ required: true, message: '请填写标题！' }]">
+      <a-form-item label="标题" name="标题" >
         <a-input style="width: 100%" v-model:value="RaiderData.title" />
       </a-form-item>
 
       <!-- 分类 -->
-      <a-form-item label="分类" name="分类" :rules="[{ required: true, message: '请选择分类！' }]">
+      <a-form-item label="分类" name="分类">
         <a-select ref="select" v-model:value="RaiderData.classification" style="width: 100%">
           <a-select-option v-for="(item, index) in optionsAdd" :key="index" :value="item.value">
             {{ item.label }}
@@ -206,18 +206,20 @@
       </a-form-item>
 
       <!-- 内容 -->
-      <a-form-item label="攻略内容" name="攻略内容" :rules="[{ required: true, message: '请填写攻略内容！' }]">
+      <a-form-item label="攻略内容" name="攻略内容" >
         <a-textarea placeholder="攻略内容，可直接粘贴，需要换行的地方记得回车~" v-model:value="RaiderData.content" />
       </a-form-item>
 
 
       <!-- 上传图片部分 -->
-      <a-upload style="width:100%;display: flex;" v-model:file-list="fileList1"
-        action="https://www.mocky.io/v2/5cc8019d300000980a055e76" list-type="picture" class="upload-list-inline">
-        <PlusSquareOutlined width:100px;height: 100px;>
+      <a-form-item label="上传图片" name="上传图片" >
+      <a-upload style="width:100%;display: flex;" :show-upload-list="true" v-model:file-list="fileList1"
+        action="http://localhost:8081/upload/User" list-type="picture" class="upload-list-inline" @change="handleUploadChange">
+        <PlusSquareOutlined>
           <upload-outlined></upload-outlined>
         </PlusSquareOutlined>
       </a-upload>
+    </a-form-item>
     </a-modal>
 
   </div>
@@ -235,7 +237,8 @@ const RaiderData = ref({
   title: '',
   content: '',
   link: '',
-  classification: '#美食'
+  classification: '#美食',
+  status:'1'
 });
 
 const container = ref(null);
@@ -244,22 +247,9 @@ const loadingAdd = ref(false);
 
 const openAdd = ref(false);
 
-const fileList1 = ref([
-  {
-    uid: '-1',
-    name: 'xxx.png',
-    status: 'done',
-    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  },
-  {
-    uid: '-2',
-    name: 'yyy.png',
-    status: 'done',
-    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-  },
-]);
+const imageUrl = ref([]);
+
+const fileList1 = ref([]);
 
 const optionsAdd = ref([
   {
@@ -288,6 +278,27 @@ const optionsAdd = ref([
   }
 ])
 
+const  handleUploadChange = (info) => {
+      const { status, response } = info.file;
+      console.log("response", response);
+
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        console.log("response", response);
+        const i = response.split(':')
+        i.shift();
+        // this.registerForm.avatarUrl = i.join(':');
+        imageUrl.value.push(i.join(':'));
+        message.success(`${info.file.name} 文件上传成功.`);
+        console.log("imageUrl", imageUrl);
+
+      } else if (status === 'error') {
+        message.error(`${info.file.name} 文件上传失败.`);
+      }
+    }
+
 const showModalAdd = () => {
   openAdd.value = true;
   DetailPoint.value = false;
@@ -296,11 +307,17 @@ const showModalAdd = () => {
 
 const handleOkAdd = () => {
   loadingAdd.value = true;
-  setTimeout(() => {
+  RaiderData.value.link = '['+imageUrl.value.join(',') +']'
+  api.post("/resources/insert",{...RaiderData.value},{
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  }).then(()=>{
     loadingAdd.value = false;
     openAdd.value = false;
     DetailPoint.value = true;
-  }, 2000);
+    message.success("新增攻略成功！")
+  })
 };
 
 const handleCancelAdd = () => {
@@ -1126,6 +1143,7 @@ onMounted(() => {
 }
 
 .upload-list-inline :deep(.ant-upload-list-item) {
+  display: flex;
   float: left;
   width: 200px;
   margin-right: 8px;
@@ -1133,5 +1151,6 @@ onMounted(() => {
 
 .upload-list-inline [class*='-upload-list-rtl'] :deep(.ant-upload-list-item) {
   float: right;
+  display: flex;
 }
 </style>

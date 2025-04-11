@@ -3,17 +3,22 @@
         <div class="leftContent">
             <a-carousel autoplay :after-change="onChange">
                 <div class="image-container" :v-for="(url, index) in item.link" :key="index">
-                    <img alt="example" :src="'/' + item.link[0]" />
+                    <img v-if="item.status!=1" alt="example" :src="'/' + item.link[0]" />
+                    <img v-else-if="item.status==1" alt="example" :src="item.link[0]" />
                 </div>
             </a-carousel>
         </div>
         <div class="rightContent">
+            <h1>{{ item.title }}</h1>
                 <div style="" v-for="(cx, index) in item.content" :key="index">
                     {{ cx }}
                 </div>
         </div>
     </div>
     <div class="footer">
+        <a-divider style="height: 10px" orientation="right" orientation-margin="0px">
+            <a-input v-model:value="comment" :bordered="false" placeholder="点击我，留下评论" @pressEnter="commentSubmit()" />
+        </a-divider>
         <a-list class="demo-loadmore-list" :loading="initLoading" :header="`${data.length} 条评论`" item-layout="horizontal"
             :data-source="data">
             <template #renderItem="{ item }">
@@ -53,6 +58,30 @@ const route = useRoute();
 dayjs.extend(relativeTime);
 
 const data = ref([]);
+
+const comment = ref("");
+
+const commentSubmit = () => {
+    const userId = localStorage.getItem('userId');
+    api.post('/comment/insert', {
+        content: comment.value,
+        detailId: parseInt(item.value.id, 10),
+        uid: userId,
+        user_project_id: localStorage.getItem('userProjectId'),
+        createTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => {
+        console.log("res == ", res);
+    })
+    setTimeout(() => {
+        data.value = [];
+        getData(item.value.id);
+        comment.value = '';
+    }, 1000);
+};
 
 const parseTravelText = () => {
     const lines = item.value.content.split("\n");
@@ -100,6 +129,7 @@ const item = ref({
     title: "",
     content: "",
     link: [],
+    status:''
 });
 const user = ref({
     id: '',
@@ -117,6 +147,11 @@ onMounted(() => {
         item.value.link.push(route.query.link);
         console.log("item.value.link", item.value.link);
     }
+    else{
+        item.value.link.push(route.query.link);
+        console.log("item.value.link", item.value.link);
+    }
+    item.value.status = route.query.status;
     console.log("item", item);
     item.value.content = parseTravelText();
 
@@ -202,13 +237,10 @@ onMounted(() => {
     color: #fff;
 }
 
-.leftContent img {
-    max-width: 100%;
-    /* 确保图片宽度不超过父容器 */
-    max-height: 100%;
-    /* 确保图片高度不超过父容器 */
-    object-fit: contain;
-    /* 保持图片比例，不裁剪 */
+img {
+    width: 100%; /* 宽度占满容器 */
+    height: 100%; /* 高度占满容器 */
+    object-fit: scale-down; /* 在不超出容器的前提下放大图片 */
 }
 
 .image-container {
@@ -216,6 +248,7 @@ onMounted(() => {
     justify-content: center;
     align-items: center;
     position: relative;
+    /* object-fit: cover; */
     width: 100%;
     height: 100%;
     overflow: hidden;

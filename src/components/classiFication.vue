@@ -13,7 +13,9 @@
         <a-card :loading="loading" hoverable v-for="(item, index) in resources" :key="index" style="width: 200px;margin: 20px;"
             @click="cardPark(item)">
             <template #cover>
-                <img alt="example" :src="'/' + item.link" />
+                
+                <img v-if="item.status!=1" alt="example" :src="'/' + item.link" />
+                <img v-else-if="item.status==1" alt="example" :src="item.link" />
             </template>
             <a-card-meta :title="item.title" :description="item.content" class="ellipsis">
             </a-card-meta>
@@ -117,6 +119,9 @@ const readExcel = (href) => {
         resources.value = res.data.map((item, index) => {
             item.index = index + 1;
             item.content =  item.content.replace(/(?<!\n) /g, "\n");
+            if(item.status == 1){
+                item.link = item.link.slice(1, -1);
+            }
             return item;
         })        
         loading.value = false;
@@ -132,7 +137,7 @@ const getCurrentAnchor = () => {
 
 const cardPark = (item) => {
     
-    router.push({ name: 'DetailFication', query: {id:item.id, content: item.content, title: item.title, link: item.link } })
+    router.push({ name: 'DetailFication', query: {id:item.id, content: item.content, title: item.title, link: item.link,status:item.status } })
     localStorage.setItem('classiFication', JSON.stringify({ uid: route.query.uid,tid: route.query.tid,city: route.query.city,href:href.value })); // 保存变量到localStorage
 }
 
