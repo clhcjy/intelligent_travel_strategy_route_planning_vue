@@ -19,7 +19,7 @@
             <a-statistic title="网站目前总用户数" :value="UserTotal" style="margin-right: 50px" />
             <!-- <div style="background: #ececec; padding: 30px"> -->
             <a-card style="background-color: transparent;border: none;">
-                <a-statistic title="今日访问量" :value="AccessPercentage" :precision="2" suffix="%" :valueStyle="AccessPercentageStatus == 1 ?{ color: '#3f8600' } : { color: '#cf1322' }"
+                <a-statistic title="今日访问较昨日百分比" :value="AccessPercentage"  suffix="%" :valueStyle="AccessPercentageStatus == 1 ?{ color: '#3f8600' } : { color: '#cf1322' }"
                     style="margin-right: 50px">
                     <template #prefix>
                         <arrow-up-outlined v-if="AccessPercentageStatus == 1"/>
@@ -29,9 +29,9 @@
             </a-card>
         </a-col>
         <a-col :span="12">
-            <a-statistic title="今日新增用户数" :precision="2" :value="todayUser" />
+            <a-statistic title="今日新增用户数"  :value="todayUser" />
             <a-card style="background-color: transparent;border: none;">
-                <a-statistic title="今日攻略新增数" :value="projectResultData" :precision="2" suffix="%" class="demo-class"
+                <a-statistic title="今日攻略新增较昨日百分比" :value="projectResultData"  suffix="%" class="demo-class"
                 :valueStyle="projectResultStatus == 1 ?{ color: '#3f8600' } : { color: '#cf1322' }">
                     <template #prefix>
                         <arrow-up-outlined v-if="projectResultStatus == 1"/>
@@ -153,17 +153,22 @@ const fetchData = async () => {
         return item.time.split("T")[0] === yesterday.toISOString().split("T")[0];
     });
 
-    if (todayNew.value.length > VisitedYesterday.value.length) {
+
+
+    if (todayNew.value.length > VisitedYesterday.value.length && VisitedYesterday.value.length!=0) {
         AccessPercentageStatus.value = 1;
         AccessPercentage.value = (Number(todayNew.value.length - VisitedYesterday.value.length) / Number(VisitedYesterday.value.length)) * 100;
-    }else if (todayNew.value.length < VisitedYesterday.value.length) {
+    }else if (todayNew.value.length < VisitedYesterday.value.length && VisitedYesterday.value.length!=0) {
         AccessPercentageStatus.value = -1;
         AccessPercentage.value = (Number(VisitedYesterday.value.length - todayNew.value.length) / Number(VisitedYesterday.value.length)) * 100;
-    } else {
-        AccessPercentageStatus.value = 0;
+    } else if(VisitedYesterday.value.length == 0&&todayNew.value.length!=0){
+        AccessPercentageStatus.value = 1;
+        AccessPercentage.value = (Number(todayNew.value.length)) * 100;
+    }else {
+        AccessPercentageStatus.value = -1;
         AccessPercentage.value = 0;
     }
-
+console.log("AccessPercentage",AccessPercentage.value);
     const todayNewProject = ref([]);
 
     const VisitedYesterdayProject = ref([]);
@@ -179,14 +184,18 @@ const fetchData = async () => {
         yesterday.setDate(yesterday.getDate() - 1); // 减去一天
         return item.time.split("T")[0] === yesterday.toISOString().split("T")[0];
     });
-
-    if (todayNewProject.value.length > VisitedYesterdayProject.value.length) {
+console.log("todayNewProject.value.length",todayNewProject.value.length);
+console.log("VisitedYesterdayProject.value.length",VisitedYesterdayProject.value.length);
+    if (todayNewProject.value.length > VisitedYesterdayProject.value.length && VisitedYesterdayProject.value.length!=0) {
         projectResultStatus.value = 1;
         projectResultData.value = (Number(todayNewProject.value.length - VisitedYesterdayProject.value.length) / Number(VisitedYesterdayProject.value.length)) * 100;
-    }else if (todayNewProject.value.length < VisitedYesterdayProject.value.length) {
+    }else if (todayNewProject.value.length < VisitedYesterdayProject.value.length && VisitedYesterdayProject.value.length!=0) {
         projectResultStatus.value = -1;
         projectResultData.value = (Number(VisitedYesterdayProject.value.length - todayNewProject.value.length) / Number(VisitedYesterdayProject.value.length)) * 100;
-    } else {
+    }else if(VisitedYesterdayProject.value.length == 0){
+        projectResultStatus.value = 1;
+        projectResultData.value = (Number(todayNewProject.value.length))*100;
+    }else {
         projectResultStatus.value = 0;
         projectResultData.value = 0;
     }
