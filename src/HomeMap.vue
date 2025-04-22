@@ -44,7 +44,6 @@
               <a-menu-item key="1" @click="toPersonalCenter">个人资料</a-menu-item>
               <a-menu-item key="2">设置</a-menu-item>
               <a-menu-item key="3">帮助中心</a-menu-item>
-              <a-menu-item key="4">世界你好</a-menu-item>
             </a-sub-menu>
             <a-sub-menu key="sub3">
               <template #title>
@@ -56,7 +55,6 @@
               <a-menu-item key="5" @click="toMap">地图模式</a-menu-item>
               <a-menu-item key="6" @click="toData">数据模式</a-menu-item>
               <!-- <a-menu-item key="7">option7</a-menu-item> -->
-              <a-menu-item key="8" @click="toAi">AI模式</a-menu-item>
             </a-sub-menu>
             <a-sub-menu key="sub4">
               <template #title>
@@ -66,7 +64,6 @@
                 </span>
               </template>
               <a-menu-item key="9" @click="toLiveness">网站用户活跃度统计</a-menu-item>
-              <a-menu-item key="10">打赏支持</a-menu-item>
               <a-menu-item key="11">留言板</a-menu-item>
               <!-- <a-menu-item key="12">option12</a-menu-item> -->
             </a-sub-menu>
