@@ -54,6 +54,7 @@
               </template>
               <a-menu-item key="5" @click="toMap">地图模式</a-menu-item>
               <a-menu-item key="6" @click="toData">数据模式</a-menu-item>
+              <a-menu-item key="7" @click="toClass">资源查询</a-menu-item>
               <!-- <a-menu-item key="7">option7</a-menu-item> -->
             </a-sub-menu>
             <a-sub-menu key="sub4">
@@ -123,6 +124,10 @@ export default defineComponent({
     toLogin(){
       this.$router.push({name:`login`});
       localStorage.clear();
+    },
+    toClass() {
+      this.rou = 'menu'
+      this.$router.push({name:"StrategyDataDetail"});
     },
 
     toData() {

@@ -32,7 +32,7 @@
         </template>
       </a-table>
     </a-tab-pane>
-    <a-tab-pane key="2" tab="开始创作">
+    <!-- <a-tab-pane key="2" tab="开始创作">
       <a-back-top />
       <a-alert message="小旅欢迎您！" description="准备好了我们就开始吧！" type="success" show-icon closable>
         <template #icon><smile-outlined /></template>
@@ -88,35 +88,35 @@
     <a-tab-pane key="3" tab="资源查询" @click="toClass">
       <a-back-top />
       <router-view />
-    </a-tab-pane>
+    </a-tab-pane> -->
   </a-tabs>
 
 
 
 </template>
 <script setup>
-import { SmileOutlined, InfoCircleOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons-vue';
+import { SmileOutlined} from '@ant-design/icons-vue';
 import { ref, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
-import { flattenedData } from '@/AreaDatas/flattenAddressData.js';
-import dayjs from 'dayjs';
+// import { flattenedData } from '@/AreaDatas/flattenAddressData.js';
+// import dayjs from 'dayjs';
 import api from '@/api/request.js';
 import { useRouter } from 'vue-router';
 
-const strategyName = ref('');
+// const strategyName = ref('');
 
 const router = useRouter();
 
-let current = ref(1);
-let pageSize = ref(5);
+// let current = ref(1);
+// let pageSize = ref(5);
 const activeKey = ref('1');
-const type = ref({
-  table: '',
-  city: '',
-  time: '',
+// const type = ref({
+//   table: '',
+//   city: '',
+//   time: '',
 
-});
-const isStart = ref(false);
+// });
+// const isStart = ref(false);
 
 const columns = [
   {
@@ -141,35 +141,35 @@ const columns = [
   },
 ];
 
-const TravingColumns = [
-  {
-    title: '序号',
-    dataIndex: 'index',
-    key: 'index',
-    width: 80,
-    align: 'center',
-  },
-  {
-    title: '城市名',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: '开始时间',
-    dataIndex: 'startTime',
-    key: 'startTime',
-  },
-  {
-    title: '结束时间',
-    dataIndex: 'endTime',
-    key: 'endTime',
-  }
-];
+// const TravingColumns = [
+//   {
+//     title: '序号',
+//     dataIndex: 'index',
+//     key: 'index',
+//     width: 80,
+//     align: 'center',
+//   },
+//   {
+//     title: '城市名',
+//     dataIndex: 'name',
+//     key: 'name',
+//   },
+//   {
+//     title: '开始时间',
+//     dataIndex: 'startTime',
+//     key: 'startTime',
+//   },
+//   {
+//     title: '结束时间',
+//     dataIndex: 'endTime',
+//     key: 'endTime',
+//   }
+// ];
 
-let TravingData = [];
+// let TravingData = [];
 
 const data = ref([]);
-let position = ref([]);
+// let position = ref([]);
 
 const deleteStrategy = (record) => {
   api.post("/project/delete", { pid: record.pid },{headers:{'Content-Type': 'application/x-www-form-urlencoded'}}).then((res) => {
@@ -187,43 +187,43 @@ const tabClick = () => {
   router.push({name:"StrategyDataDetail"});
 }
 }
-const toClass = () => {
-  router.push({name:"StrategyDataDetail"});
-}
+// const toClass = () => {
+//   router.push({name:"StrategyDataDetail"});
+// }
 
-const onSearch = (value) => {
-  console.log('search:', value);
-  console.log("已添加的地点：", position.value);
-};
+// const onSearch = (value) => {
+//   console.log('search:', value);
+//   console.log("已添加的地点：", position.value);
+// };
 
-const StartTheStrategy = () => {
-  console.log(current, pageSize);
-  isStart.value = true
+// const StartTheStrategy = () => {
+//   console.log(current, pageSize);
+//   isStart.value = true
 
-}
+// }
 
-const cityTime = [];
-let day = '';
-const changeTime = () => {
-  // let day = dayjs(cityTime[1]);
-  for (let i = 0; i < cityTime.length; i++) {
-    for (let j = 0; j < cityTime[i].length; j++) {
-      day = cityTime[i][j]
-    }
-  }
-  console.log("day == ", day);
+// const cityTime = [];
+// let day = '';
+// const changeTime = () => {
+//   // let day = dayjs(cityTime[1]);
+//   for (let i = 0; i < cityTime.length; i++) {
+//     for (let j = 0; j < cityTime[i].length; j++) {
+//       day = cityTime[i][j]
+//     }
+//   }
+//   console.log("day == ", day);
 
-};
+// };
 
-const disabledDate = (current) => {
-  // Can not select days before today and today
-  if (!day) {
-    return current && current < dayjs().endOf('day');
-  } else {
-    return current && current < dayjs(day).endOf('day');
-  }
+// const disabledDate = (current) => {
+//   // Can not select days before today and today
+//   if (!day) {
+//     return current && current < dayjs().endOf('day');
+//   } else {
+//     return current && current < dayjs(day).endOf('day');
+//   }
 
-};
+// };
 
 const toDetail = (record) => {
   localStorage.setItem('userProjectId', JSON.stringify(record.pid));
@@ -235,76 +235,76 @@ const toDetail = (record) => {
 //   state.selectedRowKeys = selectedRowKeys;
 // };
 
-const enterName = (e) => {
-  if (!e.target.value) {
-    message.info("名称不能为空哦！")
-  } else {
-    type.value.city = "1"
-    api.post("/project/insert", { uid: localStorage.getItem('userId'), projectName: e.target.value }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => {
-      localStorage.setItem('projectId', JSON.stringify(res.data.pid)); // 保存变量到localStorage
-    })
-  }
-};
+// const enterName = (e) => {
+//   if (!e.target.value) {
+//     message.info("名称不能为空哦！")
+//   } else {
+//     type.value.city = "1"
+//     api.post("/project/insert", { uid: localStorage.getItem('userId'), projectName: e.target.value }, {
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     }).then(res => {
+//       localStorage.setItem('projectId', JSON.stringify(res.data.pid)); // 保存变量到localStorage
+//     })
+//   }
+// };
 
-const DetermineTheCity = () => {
-  if (!position.value) {
-    message.info("请选择城市！")
-  } else {
-    type.value.time = "1"
-    console.log("position == ", position.value);
-  }
-};
+// const DetermineTheCity = () => {
+//   if (!position.value) {
+//     message.info("请选择城市！")
+//   } else {
+//     type.value.time = "1"
+//     console.log("position == ", position.value);
+//   }
+// };
 
-const ConfirmTheTime = () => {
-  type.value.table = ""
-  TravingData = [];
-  let index = 0;
-  const userId = localStorage.getItem('userId');
-  for (let i = 0; i < cityTime.length; i++) {
-    TravingData.push({
-      index: index,
-      uid: userId,
-      name: position.value[i],
-      startTime: cityTime[i][0],
-      endTime: cityTime[i][1],
-    });
-    index++;
-  }
-  console.log("TravingData == ", TravingData);
-  type.value.table = "1"
-};
+// const ConfirmTheTime = () => {
+//   type.value.table = ""
+//   TravingData = [];
+//   let index = 0;
+//   const userId = localStorage.getItem('userId');
+//   for (let i = 0; i < cityTime.length; i++) {
+//     TravingData.push({
+//       index: index,
+//       uid: userId,
+//       name: position.value[i],
+//       startTime: cityTime[i][0],
+//       endTime: cityTime[i][1],
+//     });
+//     index++;
+//   }
+//   console.log("TravingData == ", TravingData);
+//   type.value.table = "1"
+// };
 
-const ConfirmTheTravel = () => {
-  let traving = [];
-  TravingData.forEach(item => {
-    traving.push({
-      pid: localStorage.getItem('projectId'),
-      city: item.name,
-      startTime: item.startTime,
-      endTime: item.endTime,
-      uid: item.uid
-    });
-  });
-  for (let item in traving) {
-    console.log(traving[item]);
-    api.post("/traving/insert", traving[item], {
-      header: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => {
-      message.success("添加成功！")
-      console.log("res == ", res);
-    }).catch(err => {
-      message.error("添加失败！")
-      console.log(err);
-    });
-  }
+// const ConfirmTheTravel = () => {
+//   let traving = [];
+//   TravingData.forEach(item => {
+//     traving.push({
+//       pid: localStorage.getItem('projectId'),
+//       city: item.name,
+//       startTime: item.startTime,
+//       endTime: item.endTime,
+//       uid: item.uid
+//     });
+//   });
+//   for (let item in traving) {
+//     console.log(traving[item]);
+//     api.post("/traving/insert", traving[item], {
+//       header: {
+//         'Content-Type': 'application/json'
+//       }
+//     }).then(res => {
+//       message.success("添加成功！")
+//       console.log("res == ", res);
+//     }).catch(err => {
+//       message.error("添加失败！")
+//       console.log(err);
+//     });
+//   }
 
-};
+// };
 
 const searchAll = () => {
   api.post("/project/searchByUid",{uid:localStorage.getItem('userId')},{
