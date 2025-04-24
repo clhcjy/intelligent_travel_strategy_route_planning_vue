@@ -216,7 +216,11 @@ export default defineComponent({
     // this.loadMapScript(); // 加载百度地图资源
   },
   created() {
-    this.rou = null;
+    if(localStorage.getItem("rou")){
+      this.rou = localStorage.getItem("rou")
+    }else{
+      this.rou = null;
+    }
     //this.loadMapScript();
   },
   watch: {

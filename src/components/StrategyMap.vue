@@ -131,12 +131,12 @@
           <a-tag color="success" class="label" v-for="item in pointDetail.tags" :key="item">{{ item }}</a-tag>
         </p>
         <div style="justify-content: space-around; width: 100%; display: flex;margin-top: 10px;margin-bottom: 10px;">
-          <a-button @click="SetStartingPoint()" v-if="!isStartingPoint">设为起点</a-button>
-          <a-button @click="DeleteStartingPoint()"
-            v-else-if="isStartingPoint && pointDetail.isStartingPoint">取消起点</a-button>
-          <a-button @click="SetEndPoint()" v-if="!isEndingPoint">设为终点</a-button>
-          <a-button @click="DeleteEndPoint()" v-else-if="isEndingPoint && pointDetail.isEndPoint">取消终点</a-button>
-          <a-button @click="update" v-if="isupdate">最终确定</a-button>
+          <a-button @click="SetStartingPoint()">设为起点</a-button>
+          <!-- <a-button @click="DeleteStartingPoint()"
+            v-else-if="isStartingPoint && pointDetail.isStartingPoint">取消起点</a-button> -->
+          <a-button @click="SetEndPoint()">设为终点</a-button>
+          <!-- <a-button @click="DeleteEndPoint()" v-else-if="isEndingPoint && pointDetail.isEndPoint">取消终点</a-button> -->
+          <a-button @click="update">最终确定</a-button>
         </div>
         <a-select v-model:value="searchText" placeholder="选择标签"
           :get-popup-container="(triggerNode) => triggerNode.parentNode" @change="searchNearby" style="width: 100%">
@@ -162,9 +162,10 @@
           </div>
 
           <div style="width:300px;display: flex;flex-wrap: wrap;">
-            <a-card v-for="(item, index) in recommendation" :key="index" style="width: 100px;margin: 10px;">
+            <a-card v-for="(item, index) in recommendation" :key="index" @click="cardPark(item)" style="width: 100px;margin: 10px;" >
               <template #cover>
-                <img alt="example" :src="'http://localhost:8082/' + item.link" />
+                <img v-if="item.status!=1" alt="example" :src="'/' + item.link" />
+                <img v-else-if="item.status==1" alt="example" :src="item.link" />
               </template>
               <a-card-meta :title="item.title">
                 <template #description>
@@ -192,7 +193,7 @@
 
 
       <!-- 标题 -->
-      <a-form-item label="标题" name="标题" >
+      <a-form-item label="标题" name="标题">
         <a-input style="width: 100%" v-model:value="RaiderData.title" />
       </a-form-item>
 
@@ -206,20 +207,21 @@
       </a-form-item>
 
       <!-- 内容 -->
-      <a-form-item label="攻略内容" name="攻略内容" >
+      <a-form-item label="攻略内容" name="攻略内容">
         <a-textarea placeholder="攻略内容，可直接粘贴，需要换行的地方记得回车~" v-model:value="RaiderData.content" />
       </a-form-item>
 
 
       <!-- 上传图片部分 -->
-      <a-form-item label="上传图片" name="上传图片" >
-      <a-upload style="width:100%;display: flex;" :show-upload-list="true" v-model:file-list="fileList1"
-        action="http://localhost:8081/upload/User" list-type="picture" class="upload-list-inline" @change="handleUploadChange">
-        <PlusSquareOutlined>
-          <upload-outlined></upload-outlined>
-        </PlusSquareOutlined>
-      </a-upload>
-    </a-form-item>
+      <a-form-item label="上传图片" name="上传图片">
+        <a-upload style="width:100%;display: flex;" :show-upload-list="true" v-model:file-list="fileList1"
+          action="http://localhost:8081/upload/User" list-type="picture" class="upload-list-inline"
+          @change="handleUploadChange">
+          <PlusSquareOutlined>
+            <upload-outlined></upload-outlined>
+          </PlusSquareOutlined>
+        </a-upload>
+      </a-form-item>
     </a-modal>
 
   </div>
@@ -227,7 +229,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined,PlusSquareOutlined } from '@ant-design/icons-vue';
+import { HighlightTwoTone, RollbackOutlined, UpOutlined, DownOutlined, PlusSquareOutlined } from '@ant-design/icons-vue';
 import api from '@/api/request.js';
 import { message } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
@@ -238,7 +240,7 @@ const RaiderData = ref({
   content: '',
   link: '',
   classification: '#美食',
-  status:'1'
+  status: '1'
 });
 
 const container = ref(null);
@@ -278,26 +280,33 @@ const optionsAdd = ref([
   }
 ])
 
-const  handleUploadChange = (info) => {
-      const { status, response } = info.file;
-      console.log("response", response);
+const cardPark = (item) => {
+  const userId = localStorage.getItem('userId'); // 假设你有用户ID
+  localStorage.setItem("rou","rou");
+  router.push({ name: 'DetailFication', params: { id: userId }, query: { id: item.id, content: item.content, title: item.title, link: item.link, status: item.status } });
+    localStorage.setItem('classiFication', JSON.stringify({ uid: route.query.uid,tid: route.query.tid,city: route.query.city,href:"#景点" })); // 保存变量到localStorage
+}
 
-      if (status !== 'uploading') {
-        console.log(info.file, info.fileList);
-      }
-      if (status === 'done') {
-        console.log("response", response);
-        const i = response.split(':')
-        i.shift();
-        // this.registerForm.avatarUrl = i.join(':');
-        imageUrl.value.push(i.join(':'));
-        message.success(`${info.file.name} 文件上传成功.`);
-        console.log("imageUrl", imageUrl);
+const handleUploadChange = (info) => {
+  const { status, response } = info.file;
+  console.log("response", response);
 
-      } else if (status === 'error') {
-        message.error(`${info.file.name} 文件上传失败.`);
-      }
-    }
+  if (status !== 'uploading') {
+    console.log(info.file, info.fileList);
+  }
+  if (status === 'done') {
+    console.log("response", response);
+    const i = response.split(':')
+    i.shift();
+    // this.registerForm.avatarUrl = i.join(':');
+    imageUrl.value.push(i.join(':'));
+    message.success(`${info.file.name} 文件上传成功.`);
+    console.log("imageUrl", imageUrl);
+
+  } else if (status === 'error') {
+    message.error(`${info.file.name} 文件上传失败.`);
+  }
+}
 
 const showModalAdd = () => {
   openAdd.value = true;
@@ -307,12 +316,12 @@ const showModalAdd = () => {
 
 const handleOkAdd = () => {
   loadingAdd.value = true;
-  RaiderData.value.link = '['+imageUrl.value.join(',') +']'
-  api.post("/resources/insert",{...RaiderData.value},{
-    headers:{
+  RaiderData.value.link = '[' + imageUrl.value.join(',') + ']'
+  api.post("/resources/insert", { ...RaiderData.value }, {
+    headers: {
       'Content-Type': 'application/json'
     }
-  }).then(()=>{
+  }).then(() => {
     loadingAdd.value = false;
     openAdd.value = false;
     DetailPoint.value = true;
@@ -358,9 +367,9 @@ const picture = ref(null);
 
 const projectName = ref('');
 
-const isStartingPoint = ref(false);
+// const isStartingPoint = ref(false);
 
-const isEndingPoint = ref(false);
+// const isEndingPoint = ref(false);
 
 const pid = ref('');
 
@@ -374,7 +383,7 @@ const DetailPoint = ref(false);
 
 const navicatVisible = ref(false);
 
-const isupdate = ref(false);
+// const isupdate = ref(false);
 
 // const htmls = ref([]);
 
@@ -401,6 +410,10 @@ const recomend = (title) => {
     console.log(res.data);
     recommendation.value = res.data.map((item, index) => {
       item.index = index + 1;
+      item.content =  item.content.replace(/(?<!\n) /g, "\n");
+            if(item.status == 1){
+                item.link = item.link.slice(1, -1);
+            }
       return item;
     })
     console.log("必看推荐", recommendation.value);
@@ -467,32 +480,44 @@ const planRoute = (a, b, other) => {
 };
 
 const SetStartingPoint = () => {
-  pointDetail.value.isStartingPoint = true
-  isStartingPoint.value = true
-  isupdate.value = true
+  // pointDetail.value.isStartingPoint = true
+  // isStartingPoint.value = true
+  // isupdate.value = true
+  for(let i of ALLpoints.value){
+    if(i.tags.indexOf("起点") != -1){
+      i.tags.splice(i.tags.indexOf("起点"), 1)
+    }
+    console.log("All",i)
+  }
   pointDetail.value.tags.push("起点")
 };
 
 const SetEndPoint = () => {
-  pointDetail.value.isEndPoint = true
-  isEndingPoint.value = true
-  isupdate.value = true
+  // pointDetail.value.isEndPoint = true
+  // isEndingPoint.value = true
+  // isupdate.value = true
+  for(let i of ALLpoints.value){
+    if(i.tags.indexOf("终点") != -1){
+      i.tags.splice(i.tags.indexOf("终点"), 1)
+    }
+    console.log("All",i)
+  }
   pointDetail.value.tags.push("终点")
 };
 
-const DeleteStartingPoint = () => {
-  delete (pointDetail.value.isStartingPoint)
-  isStartingPoint.value = false
-  isupdate.value = false
-  pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("起点"), 1)
-};
+// const DeleteStartingPoint = () => {
+//   delete (pointDetail.value.isStartingPoint)
+//   isStartingPoint.value = false
+//   isupdate.value = false
+//   pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("起点"), 1)
+// };
 
-const DeleteEndPoint = () => {
-  delete (pointDetail.value.isEndPoint)
-  isEndingPoint.value = false
-  isupdate.value = false
-  pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("终点"), 1)
-};
+// const DeleteEndPoint = () => {
+//   delete (pointDetail.value.isEndPoint)
+//   isEndingPoint.value = false
+//   isupdate.value = false
+//   pointDetail.value.tags.splice(pointDetail.value.tags.indexOf("终点"), 1)
+// };
 
 const pagination = {
   onChange: (page) => {
@@ -770,20 +795,22 @@ const addPoint = (value) => {
   map.addOverlay(label);
   label.addEventListener('click', function () {
     // 可以在这里添加点击事件，比如打开一个弹窗
-    map.centerAndZoom(point, 19);
-    map.setTilt(45); // 请注意，倾斜角度通常设置在0到60度之间
+    map.centerAndZoom(point, 19); // 先设置中心点和缩放级别
+    setTimeout(() => {
+      map.setTilt(45); // 延时设置倾斜角度
+    }, 1000);
     DetailPoint.value = !DetailPoint.value;
     pointDetail.value = value;
     recomend(pointDetail.value.title);
     if (Array.isArray(pointDetail.value.tags) && pointDetail.value.tags.length > 0) {
-      for (let i of pointDetail.value.tags) {
-        if (i == "起点") { isStartingPoint.value = true }
-        else if (i == "终点") { isEndingPoint.value = true }
-        else {
-          isStartingPoint.value = false;
-          isEndingPoint.value = false;
-        }
-      }
+      // for (let i of pointDetail.value.tags) {
+      //   if (i == "起点") { isStartingPoint.value = true }
+      //   else if (i == "终点") { isEndingPoint.value = true }
+      //   else {
+      //     isStartingPoint.value = false;
+      //     isEndingPoint.value = false;
+      //   }
+      // }
     }
 
   });
@@ -813,13 +840,28 @@ const deletePoint = (item) => {
 };
 
 const update = () => {
-  pointDetail.value.tags = JSON.stringify(pointDetail.value.tags);
-  api.post("/points/update", pointDetail.value).then(res => {
+    // delete (pointDetail.value.isStartingPoint)
+  // isStartingPoint.value = false
+  // isupdate.value = false
+  console.log("pointDetail",pointDetail.value);
+  for(let i of ALLpoints.value){
+    console.log("i",i);
+    i.tags = JSON.stringify(i.tags);
+    
+    api.post("/points/update", i).then(res => {
     message.success("修改成功！", res)
-    window.location.reload();
+    // window.location.reload();
   }).catch(err => {
     message.error("修改失败！", err)
   });
+  }
+  // pointDetail.value.tags = JSON.stringify(pointDetail.value.tags);
+  // api.post("/points/update", pointDetail.value).then(res => {
+  //   message.success("修改成功！", res)
+  //   window.location.reload();
+  // }).catch(err => {
+  //   message.error("修改失败！", err)
+  // });
 };
 
 const addAllPoints = () => {
