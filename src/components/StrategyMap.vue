@@ -118,7 +118,7 @@
 
   <!-- 抽屉 -->
   <div
-    style="position: absolute; top: 30vh; left: 10px; width: 40%; height: 50vh; z-index: 9999; display: flex;align-items: center;justify-content: space-around; background-color: transparent;border: #000000;overflow-y: auto;"
+    style="position: absolute; top: 30vh; left: 10px; width: 25%; height: 50vh; z-index: 9999; display: flex;align-items: center;justify-content: space-around; background-color: transparent;border: #000000;overflow-y: auto;"
     v-show="DetailPoint">
     <a-drawer v-model:open="DetailPoint" class="custom-class" root-class-name="root-class-name"
       :root-style="{ color: 'blue' }" style="color: red;" :title="pointDetail.title" :get-container="false" :mask="false"
@@ -485,7 +485,7 @@ const SetStartingPoint = () => {
   // isupdate.value = true
   for(let i of ALLpoints.value){
     if(i.tags.indexOf("起点") != -1){
-      i.tags.splice(i.tags.indexOf("起点"), 1)
+      i.tags?.splice(i.tags.indexOf("起点"), 1)
     }
     console.log("All",i)
   }
@@ -850,7 +850,7 @@ const update = () => {
     
     api.post("/points/update", i).then(res => {
     message.success("修改成功！", res)
-    // window.location.reload();
+    window.location.reload();
   }).catch(err => {
     message.error("修改失败！", err)
   });
@@ -884,7 +884,7 @@ const addAllPoints = () => {
   ALLpoints.value = [];
 
   points.value = pointList.value;
-
+  window.location.reload();
 
 };
 
@@ -1094,6 +1094,7 @@ onMounted(() => {
             addPoint(value);
             ALLpoints.value.push({
               id: id,
+              position_id:value.position_id,
               title: value.title,
               lng: value.lng,
               lat: value.lat,
@@ -1129,6 +1130,7 @@ onMounted(() => {
   driving = new BMapGL.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
   bus = new BMapGL.TransitRoute(map, { renderOptions: { map: map, autoViewport: true } });
   walking = new BMapGL.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+  riding = new BMapGL.RidingRoute(map, { renderOptions: { map: map, autoViewport: true } });
 
 });
 </script>
