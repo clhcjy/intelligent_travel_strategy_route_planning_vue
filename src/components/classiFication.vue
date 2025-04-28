@@ -67,6 +67,9 @@ const callPythonScript = () => {
         resources.value = res.data.map((item, index) => {
             item.index = index + 1;
             item.content =  item.content.replace(/(?<!\n) /g, "\n");
+            if(item.status == 1){
+                item.link = item.link.slice(1, -1);
+            }
             return item;
         })
         loading.value = false;

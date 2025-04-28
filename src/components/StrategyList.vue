@@ -70,7 +70,7 @@ const handleUploadChange = ({ file, fileList }) => {
     }
     if (status === 'done') {
         console.log("response", response);
-        const a = response.split(':');
+        const a = response?.split(':');
         const b = a[1] + ":" + a[2] + ":" + a[3];
         const i = b;
         let item = projects.value.find(item => item.pid === editValuePicture.value)

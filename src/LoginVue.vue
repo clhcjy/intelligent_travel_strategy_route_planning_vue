@@ -156,7 +156,7 @@ export default {
       console.log('注册表单数据:', this.registerForm);
 
       // 处理注册逻辑
-      api.post("/register", { username: this.registerForm.username, password: this.registerForm.password, avatarUrl: this.registerForm.avatarUrl }).then(() => {
+      api.post("/register", { username: this.registerForm.username, password: this.registerForm.password, avatarUrl: this.registerForm.avatarUrl,createTime : new Date().getFullYear() + "-" + ((new Date().getMonth() + 1) > 9 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)) + "-" + (new Date().getDate() > 9 ? new Date().getDate() : '0' + new Date().getDate()) + ' ' + (new Date().getHours() > 9 ? new Date().getHours() : '0' + new Date().getHours()) + ':' + (new Date().getMinutes() > 9 ? new Date().getMinutes() : '0' + new Date().getMinutes()) + ':' + (new Date().getSeconds() > 9 ? new Date().getSeconds() : '0' + new Date().getSeconds()) }).then(() => {
         message.success("注册成功")
         api.post("/login", { username: this.registerForm.username, password: this.registerForm.password }).then(res => {
           if (res.data === '') {

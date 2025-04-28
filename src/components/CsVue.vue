@@ -84,7 +84,7 @@ const commentSubmit = () => {
 };
 
 const parseTravelText = () => {
-    const lines = item.value.content.split("\n");
+    const lines = item.value.content?.split("\n");
     return lines;
 }
 

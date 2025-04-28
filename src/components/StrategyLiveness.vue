@@ -116,7 +116,7 @@ const fetchData = async () => {
             // const formattedTime = localTime.toISOString().replace('T', ' ').substring(0, 19);
 
             // 创建一个新的对象，包含 time
-            const newItem = { ...template, time: record.time.split("T")[0] };
+            const newItem = { ...template, time: record.time?.split("T")[0] };
 
             // 将新对象添加到结果数组
             result.value.push(newItem);
@@ -129,7 +129,7 @@ const fetchData = async () => {
     const projectResult = ref([]);
     // 遍历 records 数组
     newProject.data.forEach(record => {
-            const newItem = { ...record, time: record.createTime.split(" ")[0] };
+            const newItem = { ...record, time: record.createTime?.split(" ")[0] };
 
             // 将新对象添加到结果数组
             projectResult.value.push(newItem);
@@ -141,16 +141,17 @@ const fetchData = async () => {
 
     const VisitedYesterday = ref([]);
 
+    console.log("result",result.value);
     todayNew.value = result.value.filter(item => {
         // console.log("item", item);
-        return item.time.split("T")[0] === new Date().toISOString().split("T")[0];
+        return item.time === new Date().toISOString()?.split("T")[0];
     });
-
+console.log("todayNew.value",todayNew.value);
     VisitedYesterday.value = result.value.filter(item => {
         // 获取当前日期并减去一天，得到昨天的日期
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1); // 减去一天
-        return item.time.split("T")[0] === yesterday.toISOString().split("T")[0];
+        return item.time === yesterday.toISOString()?.split("T")[0];
     });
 
 
@@ -175,14 +176,14 @@ console.log("AccessPercentage",AccessPercentage.value);
 
     todayNewProject.value = projectResult.value.filter(item => {
         // console.log("item", item);
-        return item.time.split("T")[0] === new Date().toISOString().split("T")[0];
+        return item.time?.split("T")[0] === new Date().toISOString()?.split("T")[0];
     });
 
     VisitedYesterdayProject.value = projectResult.value.filter(item => {
         // 获取当前日期并减去一天，得到昨天的日期
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1); // 减去一天
-        return item.time.split("T")[0] === yesterday.toISOString().split("T")[0];
+        return item.time?.split("T")[0] === yesterday.toISOString()?.split("T")[0];
     });
 console.log("todayNewProject.value.length",todayNewProject.value.length);
 console.log("VisitedYesterdayProject.value.length",VisitedYesterdayProject.value.length);
@@ -208,7 +209,7 @@ const UserToTotal = () => {
         console.log("UserTotal", UserTotal);
         const day = new Date().getFullYear() + "-" + ((new Date().getMonth() + 1) > 9 ? (new Date().getMonth() + 1) : '0' + (new Date().getMonth() + 1)) + "-" + (new Date().getDate() > 9 ? new Date().getDate() : '0' + new Date().getDate());
         todayUser.value = res.data.filter(item => {
-            const time = item.createTime.split(" ")[0];
+            const time = item.createTime?.split(" ")[0];
             return time === day;
         }).length;
         // todayUser.value = todayUser.value.length;
